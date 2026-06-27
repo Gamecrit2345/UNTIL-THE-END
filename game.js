@@ -2,55 +2,19 @@ const player = new Player(50, 50);
 const camera = new Camera();
 
 let scene = "school";
-let endingTriggered = false;
+let gameEnded = false;
 
-// TRUCK EVENT OBJECT
-const truckEvent = {
-  x: 200,
-  y: 90,
-  active: false,
-  triggered: false
-};
-
-function triggerSadEnding() {
-  if (endingTriggered) return;
-
-  endingTriggered = true;
-
-  setRain(true);
-  triggerShake(15);
-
-  startDialogue([
-    "Milca: Matt... hintayin mo ako!",
-    "Matt: MILCA!!",
-    "System: Isang malakas na busina ang narinig..."
-  ]);
-
-  setTimeout(() => {
-    startDialogue([
-      "....",
-      "Walang gumalaw.",
-      "Ang lahat ay natahimik."
-    ]);
-  }, 4000);
-}
-
-// CHECK TRUCK COLLISION
-function checkTruck() {
-  if (route !== "bad") return;
-
-  const dx = player.x - truckEvent.x;
-  const dy = player.y - truckEvent.y;
-  const dist = Math.sqrt(dx * dx + dy * dy);
-
-  if (dist < 15 && !truckEvent.triggered) {
-    truckEvent.triggered = true;
-    triggerSadEnding();
-  }
-}
-
-// SCHOOL UPDATE
 function update() {
+  if (gameEnded) return;
+
+  if (SceneManager.current === "school") schoolUpdate();
+
+  updateDialogue();
+  updateEffects();
+}
+
+// SCHOOL (simplified final version)
+function schoolUpdate() {
   let map = schoolMap;
 
   let nextX = player.x;
@@ -68,62 +32,51 @@ function update() {
 
   checkMilca();
   checkJollibee();
-  checkTruck();
 
-  updateDialogue();
-  updateEffects();
-}
-
-// DRAW MAP
-function drawMap() {
-  let map = schoolMap;
-
-  for (let y = 0; y < map.height; y++) {
-    for (let x = 0; x < map.width; x++) {
-      ctx.fillStyle =
-        (x === 0 || y === 0 || x === map.width - 1 || y === map.height - 1)
-          ? "#444"
-          : "#2b2b2b";
-
-      ctx.fillRect(
-        x * map.tileSize - camera.x,
-        y * map.tileSize - camera.y,
-        map.tileSize,
-        map.tileSize
-      );
-    }
+  // HAPPY END TRIGGER
+  if (Relationship.affection >= 10 && !gameEnded) {
+    gameEnded = true;
+    triggerHappyEnding();
   }
 }
 
-// DRAW WORLD
-function draw() {
-  ctx.save();
-  clearScreen();
-
-  applyShake(ctx);
-
+// DRAW
+function drawSchool() {
   drawMap();
 
-  // truck (hidden until bad route)
-  if (route === "bad") {
-    ctx.fillStyle = "red";
-    ctx.fillRect(truckEvent.x - camera.x, truckEvent.y - camera.y, 16, 10);
-  }
-
-  // Milca
   ctx.fillStyle = "pink";
   ctx.fillRect(120 - camera.x, 80 - camera.y, 8, 8);
 
-  // player
   ctx.fillStyle = "yellow";
   ctx.fillRect(player.x - camera.x, player.y - camera.y, 8, 8);
-
-  drawDialogue();
-  drawRain(ctx);
-
-  ctx.restore();
 }
 
+function drawBeach() {
+  ctx.fillStyle = "#87ceeb";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  ctx.fillStyle = "#f4d03f";
+  ctx.fillRect(0, 120, canvas.width, 60);
+
+  ctx.fillStyle = "orange";
+  ctx.fillText("🌅 Sunset Wedding Scene", 90, 60);
+
+  ctx.fillStyle = "white";
+  ctx.fillText("Matt ♥ Milca", 120, 100);
+}
+
+function draw() {
+  clearScreen();
+
+  if (SceneManager.current === "school") drawSchool();
+  if (SceneManager.current === "beach") drawBeach();
+
+  drawDialogue();
+  drawLighting(ctx);
+  drawRain(ctx);
+}
+
+// LOOP
 function loop() {
   update();
   draw();
