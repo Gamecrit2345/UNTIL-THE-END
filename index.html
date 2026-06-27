@@ -1,19 +1,2425 @@
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tl">
 <head>
-  <meta charset="UTF-8">
-  <title>UNTIL THE END</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Ikaw At Ako — Matt & Milca</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323:wght@400&display=swap');
+
+  :root {
+    --pixel: 3px;
+    --cream: #FFF8E7;
+    --gold: #F5C842;
+    --amber: #E8A020;
+    --sunset-red: #E05A2B;
+    --sunset-pink: #F0826E;
+    --sunset-purple: #6B4FA0;
+    --sky-blue: #87CEEB;
+    --deep-blue: #2C5F8A;
+    --dark: #1A1A2E;
+    --mid: #16213E;
+    --text-light: #FFF8E7;
+    --text-dark: #1A1A2E;
+    --green: #4CAF50;
+    --school-wall: #E8D5B7;
+    --school-roof: #8B6914;
+    --jollibee-red: #E30613;
+    --jollibee-yellow: #FFC300;
+    --gym-gray: #8090A0;
+    --house-brown: #A0785A;
+    --sea-blue: #1E90FF;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    width:100%; height:100%;
+    background:#000;
+    overflow:hidden;
+    font-family:'Press Start 2P', monospace;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+  }
+
+  #gameCanvas {
+    position:fixed;
+    top:0; left:0;
+    width:100%; height:100%;
+    image-rendering: pixelated;
+  }
+
+  /* ---- SCREEN LAYER ---- */
+  #screen {
+    position:fixed;
+    top:0;left:0;
+    width:100%;height:100%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+  }
+
+  /* ---- TITLE SCREEN ---- */
+  #titleScreen {
+    position:absolute;
+    inset:0;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    background: linear-gradient(180deg,#0d0221 0%,#1a0a3a 40%,#3d1c52 70%,#7a2d6e 85%,#c45e3e 95%,#e8a040 100%);
+    z-index:100;
+  }
+
+  .title-stars {
+    position:absolute;
+    top:0;left:0;right:0;bottom:0;
+    pointer-events:none;
+  }
+
+  .star {
+    position:absolute;
+    background:#fff;
+    image-rendering:pixelated;
+    animation: twinkle 2s infinite alternate;
+  }
+
+  @keyframes twinkle {
+    0%{opacity:.3} 100%{opacity:1}
+  }
+
+  .title-art {
+    margin-bottom:24px;
+    image-rendering: pixelated;
+  }
+
+  .game-title {
+    font-family:'Press Start 2P', monospace;
+    font-size:clamp(18px, 4vw, 36px);
+    color:#FFC300;
+    text-shadow: 4px 4px 0 #8B4500, -2px -2px 0 #8B4500;
+    letter-spacing:2px;
+    text-align:center;
+    margin-bottom:8px;
+    animation: titlePulse 3s ease-in-out infinite;
+  }
+
+  .game-subtitle {
+    font-family:'VT323', monospace;
+    font-size:clamp(16px, 3vw, 26px);
+    color:#F0826E;
+    text-align:center;
+    margin-bottom:32px;
+    letter-spacing:3px;
+  }
+
+  @keyframes titlePulse {
+    0%,100%{text-shadow: 4px 4px 0 #8B4500, 0 0 20px #FFC300}
+    50%{text-shadow: 4px 4px 0 #8B4500, 0 0 40px #FF8C00, 0 0 60px #FF4500}
+  }
+
+  .pixel-heart {
+    display:inline-block;
+    width:32px; height:28px;
+    background: #E8503A;
+    position:relative;
+    image-rendering:pixelated;
+    margin:0 8px;
+    clip-path: polygon(
+      25% 0%, 50% 10%, 75% 0%,
+      100% 25%, 100% 50%,
+      75% 75%, 50% 100%, 25% 75%,
+      0% 50%, 0% 25%
+    );
+    animation: heartBeat 1.2s ease-in-out infinite;
+  }
+
+  @keyframes heartBeat {
+    0%,100%{transform:scale(1)}
+    50%{transform:scale(1.2)}
+  }
+
+  .btn-start {
+    font-family:'Press Start 2P', monospace;
+    font-size:clamp(10px, 2vw, 14px);
+    color:#1A1A2E;
+    background:linear-gradient(180deg, #FFD700, #FFA500);
+    border:none;
+    padding:14px 28px;
+    cursor:pointer;
+    image-rendering:pixelated;
+    box-shadow: 4px 4px 0 #8B4500, -2px -2px 0 #FFE870;
+    transition:transform .1s, box-shadow .1s;
+    border-radius:2px;
+    animation: btnFloat .8s ease-in-out infinite alternate;
+  }
+
+  @keyframes btnFloat {
+    0%{transform:translateY(0)} 100%{transform:translateY(-4px)}
+  }
+
+  .btn-start:active {
+    transform:translate(4px,4px);
+    box-shadow:0 0 0 #8B4500;
+  }
+
+  .title-credits {
+    position:absolute;
+    bottom:16px;
+    font-family:'VT323', monospace;
+    font-size:14px;
+    color:rgba(255,255,255,.5);
+    text-align:center;
+  }
+
+  /* ---- MAIN GAME ---- */
+  #gameScreen {
+    position:absolute;
+    inset:0;
+    display:none;
+    flex-direction:column;
+  }
+
+  /* Background Scene */
+  #sceneContainer {
+    position:absolute;
+    inset:0;
+    overflow:hidden;
+  }
+
+  .scene {
+    position:absolute;
+    inset:0;
+    display:none;
+  }
+  .scene.active { display:block; }
+
+  /* ---- DIALOGUE BOX ---- */
+  #dialogueWrapper {
+    position:absolute;
+    bottom:0; left:0; right:0;
+    padding:8px 10px 60px;
+    z-index:50;
+    pointer-events:none;
+  }
+
+  #dialogueBox {
+    background: rgba(8,4,20,.92);
+    border:3px solid #F5C842;
+    box-shadow: 0 0 0 2px #8B4500, 4px 4px 0 #000;
+    padding:16px 18px 14px;
+    position:relative;
+    pointer-events:all;
+    image-rendering:pixelated;
+    cursor:pointer;
+    max-width:900px;
+    margin:0 auto;
+  }
+
+  #dialogueBox::before {
+    content:'';
+    position:absolute;
+    top:-3px;left:16px;
+    right:16px;height:3px;
+    background: linear-gradient(90deg, transparent, #F5C842 30%, #F5C842 70%, transparent);
+  }
+
+  #speakerName {
+    font-family:'Press Start 2P', monospace;
+    font-size:clamp(7px,1.5vw,11px);
+    color:#F5C842;
+    margin-bottom:10px;
+    text-shadow:2px 2px 0 #8B4500;
+    min-height:14px;
+  }
+
+  #dialogueText {
+    font-family:'VT323', monospace;
+    font-size:clamp(16px,3vw,24px);
+    color:#FFF8E7;
+    line-height:1.5;
+    min-height:48px;
+  }
+
+  #nextIndicator {
+    position:absolute;
+    bottom:8px; right:14px;
+    font-family:'Press Start 2P', monospace;
+    font-size:8px;
+    color:#F5C842;
+    animation: blink 1s step-end infinite;
+  }
+
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+  /* ---- CHOICES ---- */
+  #choicesContainer {
+    position:absolute;
+    bottom:140px;left:0;right:0;
+    display:none;
+    flex-direction:column;
+    align-items:center;
+    gap:10px;
+    z-index:60;
+    padding:0 20px;
+  }
+
+  .choice-btn {
+    font-family:'Press Start 2P', monospace;
+    font-size:clamp(7px,1.8vw,11px);
+    color:#1A1A2E;
+    background:linear-gradient(180deg,#FFD700,#FFA500);
+    border:none;
+    padding:12px 24px;
+    cursor:pointer;
+    width:100%;
+    max-width:500px;
+    box-shadow:4px 4px 0 #8B4500;
+    text-align:left;
+    transition:.1s;
+    border-radius:2px;
+    line-height:1.6;
+  }
+
+  .choice-btn:hover, .choice-btn:active {
+    transform:translate(2px,2px);
+    box-shadow:2px 2px 0 #8B4500;
+    background:linear-gradient(180deg,#FFC300,#FF8C00);
+  }
+
+  /* ---- CHARACTERS ---- */
+  #characterLayer {
+    position:absolute;
+    bottom:130px;
+    left:0;right:0;
+    display:flex;
+    justify-content:space-around;
+    align-items:flex-end;
+    pointer-events:none;
+    z-index:20;
+  }
+
+  .character {
+    image-rendering:pixelated;
+    transition: transform .3s ease, opacity .3s ease, filter .3s ease;
+    filter: drop-shadow(4px 4px 0 rgba(0,0,0,.5));
+  }
+
+  .character.dim { filter: brightness(.5) drop-shadow(4px 4px 0 rgba(0,0,0,.5)); }
+  .character.hidden { opacity:0; transform:translateY(20px); }
+  .character.shake { animation: charShake .5s ease; }
+
+  @keyframes charShake {
+    0%,100%{transform:translateX(0)}
+    20%{transform:translateX(-8px)}
+    40%{transform:translateX(8px)}
+    60%{transform:translateX(-6px)}
+    80%{transform:translateX(6px)}
+  }
+
+  /* ---- MOBILE CONTROLS ---- */
+  #mobileControls {
+    position:fixed;
+    bottom:0;left:0;right:0;
+    height:52px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:12px;
+    background:rgba(8,4,20,.95);
+    border-top:2px solid #F5C842;
+    z-index:200;
+    padding:0 16px;
+  }
+
+  .ctrl-btn {
+    font-family:'Press Start 2P', monospace;
+    font-size:9px;
+    color:#FFF8E7;
+    background:rgba(245,200,66,.15);
+    border:2px solid #F5C842;
+    padding:8px 14px;
+    cursor:pointer;
+    border-radius:2px;
+    transition:.1s;
+    white-space:nowrap;
+  }
+
+  .ctrl-btn:active {
+    background:#F5C842;
+    color:#1A1A2E;
+  }
+
+  .ctrl-tap-hint {
+    font-family:'VT323', monospace;
+    font-size:14px;
+    color:rgba(245,200,66,.6);
+    flex:1;
+    text-align:center;
+  }
+
+  /* ---- TRANSITIONS ---- */
+  #fadeOverlay {
+    position:fixed;
+    inset:0;
+    background:#000;
+    opacity:0;
+    pointer-events:none;
+    z-index:150;
+    transition: opacity .6s ease;
+  }
+
+  #fadeOverlay.fade-in { opacity:1; pointer-events:all; }
+
+  /* ---- EMOTION POPUP ---- */
+  #emotionPopup {
+    position:fixed;
+    top:20%;
+    left:50%;
+    transform:translateX(-50%) scale(0);
+    font-family:'VT323', monospace;
+    font-size:clamp(20px,5vw,36px);
+    color:#FFD700;
+    text-shadow:3px 3px 0 #8B4500;
+    z-index:170;
+    pointer-events:none;
+    transition: transform .3s cubic-bezier(.34,1.56,.64,1);
+    white-space:nowrap;
+    text-align:center;
+  }
+
+  #emotionPopup.show { transform:translateX(-50%) scale(1); }
+
+  /* ---- SCREEN FLASH ---- */
+  #screenFlash {
+    position:fixed;
+    inset:0;
+    background:#fff;
+    opacity:0;
+    pointer-events:none;
+    z-index:160;
+    transition:opacity .1s;
+  }
+
+  /* ---- CHAPTER TITLE ---- */
+  #chapterTitle {
+    position:fixed;
+    inset:0;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    background:rgba(0,0,0,.85);
+    z-index:140;
+    opacity:0;
+    pointer-events:none;
+    transition: opacity .5s;
+  }
+
+  #chapterTitle.show {
+    opacity:1;
+    pointer-events:all;
+  }
+
+  #chapterLabel {
+    font-family:'Press Start 2P', monospace;
+    font-size:clamp(8px,2vw,13px);
+    color:#F5C842;
+    letter-spacing:4px;
+    margin-bottom:16px;
+    text-shadow:3px 3px 0 #8B4500;
+  }
+
+  #chapterName {
+    font-family:'VT323', monospace;
+    font-size:clamp(22px,5vw,44px);
+    color:#FFF8E7;
+    text-align:center;
+    padding:0 20px;
+    line-height:1.3;
+  }
+
+  /* ---- ENDING SCREENS ---- */
+  #endingScreen {
+    position:fixed;
+    inset:0;
+    display:none;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    z-index:180;
+    padding:20px;
+  }
+
+  #endingScreen.sad {
+    background: linear-gradient(180deg, #0d0221 0%, #1a0533 50%, #2d1040 100%);
+  }
+
+  #endingScreen.happy {
+    background: linear-gradient(180deg, #FF6B35 0%, #F7931E 30%, #FFD700 60%, #FF6B35 100%);
+  }
+
+  .ending-title {
+    font-family:'Press Start 2P', monospace;
+    font-size:clamp(12px,3vw,24px);
+    text-align:center;
+    margin-bottom:20px;
+    line-height:1.6;
+  }
+
+  .sad .ending-title { color:#9B87B8; text-shadow:3px 3px 0 #2d0d4a; }
+  .happy .ending-title { color:#1A1A2E; text-shadow:2px 2px 0 rgba(255,255,255,.3); }
+
+  .ending-message {
+    font-family:'VT323', monospace;
+    font-size:clamp(16px,3.5vw,26px);
+    text-align:center;
+    line-height:1.6;
+    max-width:600px;
+    padding:0 16px;
+    margin-bottom:24px;
+  }
+
+  .sad .ending-message { color:#C9B8E0; }
+  .happy .ending-message { color:#2d1a00; }
+
+  .btn-replay {
+    font-family:'Press Start 2P', monospace;
+    font-size:clamp(8px,2vw,12px);
+    padding:14px 28px;
+    border:none;
+    cursor:pointer;
+    border-radius:2px;
+    box-shadow:4px 4px 0 rgba(0,0,0,.4);
+    transition:.1s;
+    margin-top:10px;
+  }
+
+  .sad .btn-replay { background:#4A2D6A; color:#C9B8E0; }
+  .happy .btn-replay { background:#1A1A2E; color:#FFD700; }
+
+  .btn-replay:active { transform:translate(4px,4px); box-shadow:0 0 0; }
+
+  /* ---- PIXEL RAIN (sad scene) ---- */
+  .rain-container {
+    position:absolute;
+    inset:0;
+    overflow:hidden;
+    pointer-events:none;
+    z-index:5;
+  }
+
+  .raindrop {
+    position:absolute;
+    width:2px;
+    background:rgba(150,200,255,.5);
+    animation: fall linear infinite;
+  }
+
+  @keyframes fall {
+    0% { transform:translateY(-100%); }
+    100% { transform:translateY(110vh); }
+  }
+
+  /* ---- PARTICLES (hearts/stars) ---- */
+  #particles {
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    z-index:10;
+    overflow:hidden;
+  }
+
+  .particle {
+    position:absolute;
+    font-size:18px;
+    animation: floatUp 2s ease-out forwards;
+    pointer-events:none;
+  }
+
+  @keyframes floatUp {
+    0%{opacity:1;transform:translateY(0) rotate(0deg)}
+    100%{opacity:0;transform:translateY(-100px) rotate(30deg)}
+  }
+
+  /* ---- PROGRESS BAR ---- */
+  #progressBar {
+    position:fixed;
+    top:0;left:0;right:0;
+    height:3px;
+    background:rgba(255,255,255,.1);
+    z-index:100;
+  }
+
+  #progressFill {
+    height:100%;
+    background: linear-gradient(90deg, #F5C842, #E05A2B);
+    transition: width .5s ease;
+  }
+
+  /* ---- LOCATION TAG ---- */
+  #locationTag {
+    position:fixed;
+    top:12px;left:12px;
+    font-family:'Press Start 2P', monospace;
+    font-size:clamp(6px,1.2vw,9px);
+    color:#F5C842;
+    background:rgba(8,4,20,.8);
+    border:2px solid #F5C842;
+    padding:5px 10px;
+    z-index:90;
+    box-shadow:2px 2px 0 #000;
+  }
+
+  /* ---- TIME TAG ---- */
+  #timeTag {
+    position:fixed;
+    top:12px;right:12px;
+    font-family:'Press Start 2P', monospace;
+    font-size:clamp(6px,1.2vw,9px);
+    color:#F5C842;
+    background:rgba(8,4,20,.8);
+    border:2px solid #F5C842;
+    padding:5px 10px;
+    z-index:90;
+    box-shadow:2px 2px 0 #000;
+  }
+
+  /* Truck animation */
+  .truck {
+    position:absolute;
+    animation: truckMove 2.5s linear forwards;
+  }
+
+  @keyframes truckMove {
+    0%{left:-200px}
+    100%{left:110%}
+  }
+
+  /* Wedding confetti */
+  .confetti-piece {
+    position:absolute;
+    width:8px;height:8px;
+    animation: confettiFall linear forwards;
+    image-rendering:pixelated;
+  }
+
+  @keyframes confettiFall {
+    0%{transform:translateY(-20px) rotate(0deg);opacity:1}
+    100%{transform:translateY(110vh) rotate(720deg);opacity:.5}
+  }
+
+  /* Typing cursor */
+  .typing-cursor {
+    display:inline-block;
+    width:3px;height:1em;
+    background:#FFF8E7;
+    margin-left:2px;
+    animation:blink 0.8s step-end infinite;
+    vertical-align:text-bottom;
+  }
+
+  /* ============ CANVAS SCENES (SVG-like pixel art via CSS) ============ */
+
+  /* SCHOOL */
+  .scene-school {
+    background: linear-gradient(180deg,#87CEEB 0%,#B8DFF5 60%,#7EC8A0 60%,#5A9E6A 100%);
+  }
+
+  /* HOUSE */
+  .scene-house-day {
+    background: linear-gradient(180deg,#87CEEB 0%,#C8E8FF 55%,#6BBF70 55%,#4A8F54 100%);
+  }
+  .scene-house-night {
+    background: linear-gradient(180deg,#0d0221 0%,#1a0a3a 50%,#2a1a4a 70%,#1A3A1A 70%,#0d2010 100%);
+  }
+
+  /* GYM */
+  .scene-gym {
+    background: linear-gradient(180deg,#B0C4D8 0%,#90A8C0 40%,#6A7A8A 40%,#4A5A6A 100%);
+  }
+
+  /* JOLLIBEE */
+  .scene-jollibee {
+    background: linear-gradient(180deg,#FFB74D 0%,#FF8C00 30%,#E30613 30%,#C00000 100%);
+  }
+
+  /* ROAD (truck scene) */
+  .scene-road {
+    background: linear-gradient(180deg,#5C8FA0 0%,#7BB8D0 40%,#808080 40%,#606060 70%,#505050 70%,#404040 100%);
+  }
+
+  /* BEACH SUNSET */
+  .scene-beach {
+    background: linear-gradient(180deg,
+      #1a0533 0%,
+      #3d1c52 10%,
+      #7a2d6e 25%,
+      #c45e3e 40%,
+      #e8a040 55%,
+      #f5c842 65%,
+      #1E90FF 65%,
+      #0060C0 80%,
+      #004090 100%
+    );
+  }
+
+  /* Clouds */
+  .cloud {
+    position:absolute;
+    background:#fff;
+    border-radius:2px;
+    image-rendering:pixelated;
+    opacity:.85;
+  }
+
+  /* Stars (night) */
+  .night-star {
+    position:absolute;
+    background:#fff;
+    width:3px;height:3px;
+    image-rendering:pixelated;
+  }
+
+  /* Ground line */
+  .ground {
+    position:absolute;
+    bottom:0;left:0;right:0;
+  }
+
+  /* ======== PIXEL ART BUILDINGS ======== */
+
+  /* SCHOOL BUILDING */
+  .school-building {
+    position:absolute;
+    bottom:40%;
+    left:10%;
+    width:60%;
+    height:45%;
+  }
+
+  /* HOUSE */
+  .house-building {
+    position:absolute;
+    bottom:38%;
+    right:8%;
+    width:38%;
+    height:42%;
+  }
+
+  /* Trees */
+  .tree { position:absolute; }
+
+  /* Pixel lamp post */
+  .lamp-post {
+    position:absolute;
+    bottom:38%;
+    width:6px;
+    background:#5A4A3A;
+  }
+
+  /* Road markings */
+  .road-line {
+    position:absolute;
+    background:rgba(255,255,255,.6);
+    height:6px;
+    width:40px;
+  }
+
+  /* ---- RESPONSIVE ---- */
+  @media (max-width:480px) {
+    #dialogueWrapper { padding:6px 6px 56px; }
+    #dialogueBox { padding:12px 12px 12px; }
+  }
+
+  /* Scrollable dialogue for long text */
+  #dialogueText { max-height:120px; overflow-y:auto; scrollbar-width:none; }
+  #dialogueText::-webkit-scrollbar { display:none; }
+</style>
 </head>
 <body>
 
 <canvas id="gameCanvas"></canvas>
+<div id="particles"></div>
+<div id="fadeOverlay"></div>
+<div id="screenFlash"></div>
 
-<script src="engine.js"></script>
-<script src="controls.js"></script>
-<script src="player.js"></script>
-<script src="camera.js"></script>
-<script src="game.js"></script>
+<!-- PROGRESS -->
+<div id="progressBar"><div id="progressFill" style="width:0%"></div></div>
+<div id="locationTag">---</div>
+<div id="timeTag">---</div>
 
+<!-- CHAPTER TITLE OVERLAY -->
+<div id="chapterTitle">
+  <div id="chapterLabel">KABANATA</div>
+  <div id="chapterName"></div>
+</div>
+
+<!-- EMOTION POPUP -->
+<div id="emotionPopup"></div>
+
+<!-- TITLE SCREEN -->
+<div id="titleScreen">
+  <div class="title-stars" id="titleStars"></div>
+
+  <div style="text-align:center;margin-bottom:16px;">
+    <span class="pixel-heart"></span>
+    <span class="pixel-heart" style="animation-delay:.3s"></span>
+    <span class="pixel-heart" style="animation-delay:.6s"></span>
+  </div>
+
+  <div class="game-title">IKAW AT AKO</div>
+  <div class="game-subtitle">~ Isang Kwento ng Pag-ibig ~</div>
+
+  <div id="titleArtCanvas" style="margin:20px auto 24px;"></div>
+
+  <button class="btn-start" id="btnStart">▶ SIMULAN</button>
+
+  <div class="title-credits">
+    <div>Matt ♥ Milca · 2015</div>
+    <div style="margin-top:6px;opacity:.6">I-tap kahit saan para magpatuloy</div>
+  </div>
+</div>
+
+<!-- GAME SCREEN -->
+<div id="gameScreen">
+  <canvas id="sceneCanvas" style="position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated;"></canvas>
+
+  <div id="characterLayer">
+    <canvas id="charLeft" class="character hidden" width="80" height="160"></canvas>
+    <canvas id="charRight" class="character hidden" width="80" height="160"></canvas>
+  </div>
+
+  <div id="dialogueWrapper">
+    <div id="dialogueBox">
+      <div id="speakerName"></div>
+      <div id="dialogueText"></div>
+      <div id="nextIndicator">▼</div>
+    </div>
+  </div>
+
+  <div id="choicesContainer"></div>
+</div>
+
+<!-- ENDING SCREEN -->
+<div id="endingScreen">
+  <div class="ending-title" id="endingTitle"></div>
+  <div class="ending-message" id="endingMessage"></div>
+  <button class="btn-replay" id="btnReplay">↺ MAGLARO ULIT</button>
+</div>
+
+<!-- MOBILE CONTROLS -->
+<div id="mobileControls">
+  <span class="ctrl-tap-hint">I-tap ang dialogue para magpatuloy</span>
+  <button class="ctrl-btn" id="btnAutoPlay">⏩ AUTO</button>
+  <button class="ctrl-btn" id="btnSkip">⏭ SKIP</button>
+</div>
+
+<script>
+/* ============================================================
+   IKAW AT AKO — Visual Novel Engine
+   Matt & Milca Story · Tagalog · Pixel Art · 2015-inspired
+   ============================================================ */
+
+const canvas = document.getElementById('sceneCanvas');
+const ctx = canvas.getContext('2d');
+ctx.imageSmoothingEnabled = false;
+
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', () => { resizeCanvas(); drawScene(); });
+
+/* ---- PIXEL FONT HELPER ---- */
+function pxFont(size) { return ${size}px "Press Start 2P", monospace; }
+function vtFont(size) { return ${size}px "VT323", monospace; }
+
+/* ============================================================
+   SCENE RENDERER
+   ============================================================ */
+const scenes = {};
+
+function reg(name, fn) { scenes[name] = fn; }
+
+function drawScene(name) {
+  if (!name) name = currentScene;
+  currentScene = name;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  if (scenes[name]) scenes[name](ctx, canvas.width, canvas.height);
+  updateTags(name);
+}
+
+function updateTags(name) {
+  const loc = {
+    'school': 'PAARALAN', 'school_night': 'PAARALAN',
+    'house': 'BAHAY NI MILCA', 'house_night': 'BAHAY (GABI)',
+    'gym': 'GYM', 'gym_inside': 'LOOB NG GYM',
+    'jollibee': 'JOLLIBEE', 'jollibee_inside': 'LOOB NG JOLLIBEE',
+    'road': 'DAAN', 'beach': 'DAGAT', 'title': '---'
+  }[name] || '---';
+
+  const time = {
+    'school': 'UMAGA', 'school_night': 'GABI',
+    'house': 'HAPON', 'house_night': 'HATINGGABI',
+    'gym': 'TANGHALI', 'gym_inside': 'HAPON',
+    'jollibee': 'HAPON', 'jollibee_inside': 'GABI',
+    'road': 'HAPON', 'beach': 'PAGLUBOG NG ARAW', 'title': '---'
+  }[name] || '---';
+
+  document.getElementById('locationTag').textContent = loc;
+  document.getElementById('timeTag').textContent = time;
+}
+
+/* -------- SHARED DRAW UTILS -------- */
+function px(v, ref, refPx) { return (v / ref) * refPx; }
+
+function drawPixelRect(ctx, x, y, w, h, color, shadow) {
+  if (shadow) { ctx.fillStyle = 'rgba(0,0,0,0.3)'; ctx.fillRect(x+4, y+4, w, h); }
+  ctx.fillStyle = color;
+  ctx.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h));
+}
+
+function drawCloud(ctx, x, y, scale=1) {
+  const s = scale;
+  ctx.fillStyle = 'rgba(255,255,255,0.85)';
+  [[0,10,30,12],[8,4,22,14],[20,2,28,16],[40,6,20,12]].forEach(([dx,dy,dw,dh]) => {
+    ctx.fillRect(Math.round(x+dx*s), Math.round(y+dy*s), Math.round(dw*s), Math.round(dh*s));
+  });
+}
+
+function drawTree(ctx, x, y, scale=1) {
+  const s = scale;
+  ctx.fillStyle = '#5A9E6A'; // leaves top
+  ctx.fillRect(Math.round(x+10*s),Math.round(y),Math.round(20*s),Math.round(18*s));
+  ctx.fillStyle = '#4A8F54';
+  ctx.fillRect(Math.round(x+6*s),Math.round(y+14*s),Math.round(28*s),Math.round(18*s));
+  ctx.fillStyle = '#3A7A44';
+  ctx.fillRect(Math.round(x+2*s),Math.round(y+28*s),Math.round(36*s),Math.round(18*s));
+  ctx.fillStyle = '#6B4226'; // trunk
+  ctx.fillRect(Math.round(x+16*s),Math.round(y+42*s),Math.round(8*s),Math.round(26*s));
+}
+
+function drawStar(ctx, x, y, size=3, bright=1) {
+  ctx.fillStyle = rgba(255,255,255,${bright});
+  ctx.fillRect(Math.round(x), Math.round(y), size, size);
+}
+
+function drawGround(ctx, W, H, color='#5A9E6A', darken='#4A8F54') {
+  ctx.fillStyle = color;
+  ctx.fillRect(0, Math.round(H*0.6), W, Math.round(H*0.4));
+  ctx.fillStyle = darken;
+  ctx.fillRect(0, Math.round(H*0.6), W, 6);
+}
+
+/* -------- SCENE: SCHOOL (DAY) -------- */
+reg('school', (ctx, W, H) => {
+  // Sky gradient
+  const skyGrad = ctx.createLinearGradient(0,0,0,H*0.6);
+  skyGrad.addColorStop(0,'#63B3D8');
+  skyGrad.addColorStop(1,'#B8DFF5');
+  ctx.fillStyle = skyGrad;
+  ctx.fillRect(0,0,W,H*0.6);
+
+  // Sun
+  ctx.fillStyle = '#FFF176';
+  ctx.fillRect(W*0.82, H*0.06, 32, 32);
+  ctx.fillStyle = '#FFD700';
+  ctx.fillRect(W*0.82+4, H*0.06+4, 24, 24);
+
+  // Sun rays (pixel)
+  ctx.fillStyle = 'rgba(255,220,50,0.6)';
+  for(let i=0;i<8;i++){
+    ctx.save(); ctx.translate(W*0.82+16, H*0.06+16);
+    ctx.rotate(i*Math.PI/4);
+    ctx.fillRect(-2,-44,4,12);
+    ctx.restore();
+  }
+
+  // Clouds
+  drawCloud(ctx, W*0.1, H*0.08, 1.1);
+  drawCloud(ctx, W*0.5, H*0.05, 0.8);
+  drawCloud(ctx, W*0.7, H*0.12, 0.9);
+
+  // Ground
+  drawGround(ctx, W, H, '#6BBF70','#5AA060');
+
+  // Path/sidewalk
+  ctx.fillStyle = '#D4C4A0';
+  ctx.fillRect(0, H*0.58, W, H*0.04);
+  ctx.fillStyle = '#C4B490';
+  for(let x=0;x<W;x+=60){ ctx.fillRect(x, H*0.58, 44, 4); }
+
+  // === SCHOOL BUILDING ===
+  const bx = W*0.08, by = H*0.12, bw = W*0.65, bh = H*0.5;
+
+  // Main wall
+  ctx.fillStyle = '#E8C88A';
+  ctx.fillRect(bx, by+bh*0.1, bw, bh*0.9);
+  ctx.fillStyle = '#D4B070';
+  ctx.fillRect(bx, by+bh*0.1, bw, 6);
+
+  // Roof
+  ctx.fillStyle = '#8B4513';
+  ctx.fillRect(bx-10, by, bw+20, bh*0.14);
+  ctx.fillStyle = '#6B3410';
+  ctx.fillRect(bx-10, by, bw+20, 6);
+
+  // Roof ridge
+  ctx.fillStyle = '#A0522D';
+  ctx.fillRect(bx+bw/2-bw*0.52, by-H*0.04, bw*1.04, H*0.06);
+  ctx.fillStyle = '#804020';
+  ctx.fillRect(bx+bw/2-bw*0.52, by-H*0.04, bw*1.04, 5);
+
+  // Flag
+  ctx.fillStyle = '#3060C0';
+  ctx.fillRect(bx+bw*0.48, by-H*0.12, 4, H*0.1);
+  ctx.fillStyle = '#E8323C';
+  ctx.fillRect(bx+bw*0.48+4, by-H*0.12, 24, 14);
+  ctx.fillStyle = '#F5C842';
+  ctx.fillRect(bx+bw*0.48+4, by-H*0.12, 24, 6);
+
+  // Windows (row 1)
+  const winColor = '#B8D8F0'; const winDark = '#80A8C8';
+  const winW = bw/8, winH = bh*0.15;
+  for(let i=0;i<5;i++){
+    const wx = bx + bw*0.06 + i*(winW+bw*0.04);
+    const wy = by + bh*0.18;
+    ctx.fillStyle = winColor; ctx.fillRect(wx,wy,winW,winH);
+    ctx.fillStyle = winDark;
+    ctx.fillRect(wx,wy+winH/2,winW,3);
+    ctx.fillRect(wx+winW/2,wy,3,winH);
+    ctx.strokeStyle='#6090B0'; ctx.lineWidth=2;
+    ctx.strokeRect(wx,wy,winW,winH);
+  }
+  // Windows (row 2)
+  for(let i=0;i<5;i++){
+    const wx = bx + bw*0.06 + i*(winW+bw*0.04);
+    const wy = by + bh*0.42;
+    ctx.fillStyle = winColor; ctx.fillRect(wx,wy,winW,winH);
+    ctx.fillStyle = winDark;
+    ctx.fillRect(wx,wy+winH/2,winW,3);
+    ctx.fillRect(wx+winW/2,wy,3,winH);
+    ctx.strokeStyle='#6090B0'; ctx.lineWidth=2;
+    ctx.strokeRect(wx,wy,winW,winH);
+  }
+
+  // Main Door
+  const dx = bx+bw/2-bw*0.08, dy = by+bh*0.68, dw = bw*0.16, dh = bh*0.32;
+  ctx.fillStyle = '#8B5A2B'; ctx.fillRect(dx,dy,dw,dh);
+  ctx.fillStyle = '#6B3A1B'; ctx.fillRect(dx,dy,dw,4);
+  ctx.fillStyle = '#F5C842'; ctx.fillRect(dx+dw-8,dy+dh/2-6,6,12); // doorknob
+  // Door arch
+  ctx.fillStyle = '#D4B070';
+  ctx.beginPath();
+  ctx.arc(dx+dw/2, dy, dw/2, Math.PI, 0);
+  ctx.fill();
+
+  // School sign
+  ctx.fillStyle = '#2C5F8A';
+  const sx = bx+bw*0.25, sy = by+bh*0.02, sw = bw*0.5, sh = bh*0.08;
+  ctx.fillRect(sx, sy, sw, sh);
+  ctx.fillStyle = '#FFF8E7';
+  ctx.font = vtFont(Math.max(12, H*0.022));
+  ctx.textAlign = 'center';
+  ctx.fillText('MABUTING PILIPINO HIGH SCHOOL', sx+sw/2, sy+sh*0.65);
+
+  // Trees left & right
+  drawTree(ctx, W*0.01, H*0.32, 0.9);
+  drawTree(ctx, W*0.75, H*0.28, 1.0);
+  drawTree(ctx, W*0.82, H*0.3, 0.8);
+
+  // Lamp posts
+  ctx.fillStyle = '#4A3A2A';
+  ctx.fillRect(W*0.06-3, H*0.42, 6, H*0.18);
+  ctx.fillStyle = '#F5C842';
+  ctx.fillRect(W*0.06-8, H*0.42, 16, 8);
+
+  // Students (tiny pixel people in background)
+  drawTinyPerson(ctx, W*0.72, H*0.55, '#3060C0', '#E8C080');
+  drawTinyPerson(ctx, W*0.78, H*0.56, '#E8323C', '#F5C842');
+  drawTinyPerson(ctx, W*0.02, H*0.55, '#305090', '#FFD0A0');
+
+  ctx.textAlign = 'left';
+});
+
+/* -------- SCHOOL NIGHT -------- */
+reg('school_night', (ctx, W, H) => {
+  // Night sky
+  const skyGrad = ctx.createLinearGradient(0,0,0,H*0.62);
+  skyGrad.addColorStop(0,'#030818');
+  skyGrad.addColorStop(1,'#0d1a38');
+  ctx.fillStyle = skyGrad;
+  ctx.fillRect(0,0,W,H*0.62);
+
+  // Stars
+  const starSeeds = [[0.1,0.05],[0.2,0.08],[0.35,0.03],[0.5,0.1],[0.62,0.06],[0.75,0.02],[0.88,0.08],[0.15,0.15],[0.45,0.13],[0.7,0.18],[0.9,0.12]];
+  starSeeds.forEach(([sx,sy]) => drawStar(ctx, W*sx, H*sy, 3, 0.9));
+
+  // Moon
+  ctx.fillStyle = '#FFF8C0';
+  ctx.beginPath(); ctx.arc(W*0.85, H*0.1, 22, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#030818';
+  ctx.beginPath(); ctx.arc(W*0.88, H*0.08, 17, 0, Math.PI*2); ctx.fill();
+
+  // Ground
+  ctx.fillStyle = '#1A2E1A';
+  ctx.fillRect(0, H*0.6, W, H*0.4);
+  ctx.fillStyle = '#0E1E0E';
+  ctx.fillRect(0, H*0.6, W, 5);
+
+  // same school building but darker
+  const bx = W*0.08, by = H*0.12, bw = W*0.65, bh = H*0.5;
+  ctx.fillStyle = '#9A8060';
+  ctx.fillRect(bx, by+bh*0.1, bw, bh*0.9);
+  ctx.fillStyle = '#4A2810'; ctx.fillRect(bx-10, by, bw+20, bh*0.14);
+  // Lit windows
+  const winW = bw/8, winH = bh*0.15;
+  for(let i=0;i<5;i++){
+    const wx = bx+bw*0.06+i*(winW+bw*0.04), wy = by+bh*0.18;
+    const lit = i%2===0;
+    ctx.fillStyle = lit ? '#FFE88A' : '#3A4860';
+    ctx.fillRect(wx,wy,winW,winH);
+    if(lit){ ctx.fillStyle='rgba(255,220,100,0.2)'; ctx.fillRect(wx-8,wy-8,winW+16,winH+16); }
+  }
+
+  // Lamp glow
+  ctx.fillStyle = 'rgba(245,200,66,0.15)';
+  ctx.beginPath(); ctx.arc(W*0.06, H*0.48, 40, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#F5C842';
+  ctx.fillRect(W*0.06-8, H*0.42, 16, 8);
+  ctx.fillStyle = '#4A3A2A'; ctx.fillRect(W*0.06-3, H*0.43, 6, H*0.18);
+
+  ctx.textAlign='left';
+});
+
+/* -------- SCENE: HOUSE (DAY) -------- */
+reg('house', (ctx, W, H) => {
+  // Sky
+  const skyGrad = ctx.createLinearGradient(0,0,0,H*0.6);
+  skyGrad.addColorStop(0,'#87CEEB');
+  skyGrad.addColorStop(1,'#C8E8FF');
+  ctx.fillStyle = skyGrad; ctx.fillRect(0,0,W,H*0.6);
+
+  drawCloud(ctx, W*0.2, H*0.07, 1.0);
+  drawCloud(ctx, W*0.6, H*0.1, 0.7);
+
+  // Ground
+  drawGround(ctx, W, H, '#6BBF70','#5AA060');
+
+  // Fence
+  ctx.fillStyle = '#F0E6C8';
+  for(let fx = W*0.52; fx < W*0.98; fx+=16){
+    ctx.fillRect(fx, H*0.5, 8, H*0.12);
+  }
+  ctx.fillStyle = '#E0D4B0';
+  ctx.fillRect(W*0.52, H*0.53, W*0.46, 6);
+  ctx.fillRect(W*0.52, H*0.57, W*0.46, 6);
+
+  // === HOUSE ===
+  const hx = W*0.52, hy = H*0.16, hw = W*0.42, hh = H*0.46;
+
+  // Shadow
+  ctx.fillStyle = 'rgba(0,0,0,0.15)';
+  ctx.fillRect(hx+6, hy+6, hw, hh);
+
+  // Main body
+  ctx.fillStyle = '#D4946A'; ctx.fillRect(hx, hy+hh*0.12, hw, hh*0.88);
+
+  // Brick pattern
+  ctx.fillStyle = 'rgba(0,0,0,0.08)';
+  for(let by2=0; by2<hh*0.88; by2+=14){
+    for(let bx2=0; bx2<hw; bx2+=28){
+      const off = Math.floor(by2/14)%2===0 ? 0 : 14;
+      ctx.fillRect(hx+bx2+off, hy+hh*0.12+by2, 26, 12);
+    }
+  }
+
+  // Roof
+  ctx.fillStyle = '#6B3A1B';
+  // Triangle roof
+  ctx.beginPath();
+  ctx.moveTo(hx-hw*0.05, hy+hh*0.14);
+  ctx.lineTo(hx+hw/2, hy-H*0.05);
+  ctx.lineTo(hx+hw+hw*0.05, hy+hh*0.14);
+  ctx.fill();
+  ctx.fillStyle = '#8B5A2B';
+  ctx.beginPath();
+  ctx.moveTo(hx-hw*0.05, hy+hh*0.14);
+  ctx.lineTo(hx+hw/2, hy-H*0.05);
+  ctx.lineTo(hx+hw/2, hy+hh*0.14);
+  ctx.fill();
+
+  // Roof detail
+  ctx.fillStyle = '#4A2810';
+  ctx.fillRect(hx-hw*0.05-4, hy+hh*0.12, hw*1.1+8, 8);
+
+  // Windows
+  const wy1 = hy+hh*0.22, ww2 = hw*0.25, wh2 = hh*0.2;
+  [[0.08],[0.42],[0.67]].forEach(([wfx]) => {
+    const wx2 = hx+hw*wfx;
+    ctx.fillStyle = '#B8E0F0'; ctx.fillRect(wx2, wy1, ww2, wh2);
+    ctx.fillStyle = '#80C0E0';
+    ctx.fillRect(wx2,wy1+wh2/2,ww2,3); ctx.fillRect(wx2+ww2/2,wy1,3,wh2);
+    ctx.strokeStyle='#6090B0'; ctx.lineWidth=2; ctx.strokeRect(wx2,wy1,ww2,wh2);
+    // Curtains
+    ctx.fillStyle='rgba(255,160,160,0.5)';
+    ctx.fillRect(wx2,wy1,ww2*0.35,wh2);
+    ctx.fillRect(wx2+ww2*0.65,wy1,ww2*0.35,wh2);
+  });
+
+  // Door
+  const dx2=hx+hw*0.38, dy2=hy+hh*0.6, dw2=hw*0.24, dh2=hh*0.4;
+  ctx.fillStyle='#6B3A1B'; ctx.fillRect(dx2,dy2,dw2,dh2);
+  ctx.fillStyle='#F5C842'; ctx.fillRect(dx2+dw2*0.75,dy2+dh2*0.45,6,10);
+  // Door window top
+  ctx.fillStyle='#B8E0F0'; ctx.fillRect(dx2+dw2*0.2,dy2+dh2*0.08,dw2*0.6,dh2*0.3);
+
+  // Flowers / garden
+  const flColors=['#E8323C','#FFD700','#E840D0','#FF8C00'];
+  for(let fi=0;fi<8;fi++){
+    ctx.fillStyle='#5A9E6A'; ctx.fillRect(hx+hw*0.05+fi*16, hy+hh-12, 4, 16);
+    ctx.fillStyle=flColors[fi%4]; ctx.fillRect(hx+hw*0.04+fi*16, hy+hh-16, 8, 8);
+  }
+
+  // Trees
+  drawTree(ctx, W*0.04, H*0.22, 1.1);
+  drawTree(ctx, W*0.18, H*0.26, 0.9);
+
+  ctx.textAlign='left';
+});
+
+/* -------- HOUSE NIGHT -------- */
+reg('house_night', (ctx, W, H) => {
+  const skyGrad = ctx.createLinearGradient(0,0,0,H*0.62);
+  skyGrad.addColorStop(0,'#030818');
+  skyGrad.addColorStop(1,'#0d1a38');
+  ctx.fillStyle = skyGrad; ctx.fillRect(0,0,W,H*0.62);
+
+  [.1,.22,.35,.5,.65,.78,.9,.15,.42,.58,.85].forEach((sx,i)=>{
+    drawStar(ctx,W*sx,H*(i*0.03+0.02),2+i%2,0.7+i*0.03);
+  });
+
+  ctx.fillStyle='#FFF8C0';
+  ctx.beginPath(); ctx.arc(W*0.15,H*0.1,20,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#030818';
+  ctx.beginPath(); ctx.arc(W*0.18,H*0.08,15,0,Math.PI*2); ctx.fill();
+
+  ctx.fillStyle='#0E2010'; ctx.fillRect(0,H*0.6,W,H*0.4);
+  ctx.fillStyle='#0A1A0A'; ctx.fillRect(0,H*0.6,W,5);
+
+  const hx=W*0.52,hy=H*0.16,hw=W*0.42,hh=H*0.46;
+  ctx.fillStyle='#8A5A40'; ctx.fillRect(hx,hy+hh*0.12,hw,hh*0.88);
+  ctx.fillStyle='#4A2810';
+  ctx.beginPath();
+  ctx.moveTo(hx-hw*0.05,hy+hh*0.14);
+  ctx.lineTo(hx+hw/2,hy-H*0.05);
+  ctx.lineTo(hx+hw+hw*0.05,hy+hh*0.14);
+  ctx.fill();
+  // Lit windows at night
+  [[0.08],[0.67]].forEach(([wfx])=>{
+    const wx2=hx+hw*wfx, wy2=hy+hh*0.22, ww2=hw*0.25, wh2=hh*0.2;
+    ctx.fillStyle='#FFE088'; ctx.fillRect(wx2,wy2,ww2,wh2);
+    ctx.fillStyle='rgba(255,220,100,0.25)'; ctx.fillRect(wx2-12,wy2-12,ww2+24,wh2+24);
+  });
+  drawTree(ctx,W*0.04,H*0.22,1.1);
+  ctx.textAlign='left';
+});
+
+/* -------- SCENE: GYM -------- */
+reg('gym', (ctx, W, H) => {
+  // Sky (overcast gray)
+  const skyGrad = ctx.createLinearGradient(0,0,0,H*0.6);
+  skyGrad.addColorStop(0,'#9AAAB8');
+  skyGrad.addColorStop(1,'#B8C8D8');
+  ctx.fillStyle = skyGrad; ctx.fillRect(0,0,W,H*0.6);
+
+  // Ground
+  ctx.fillStyle = '#7A8A90'; ctx.fillRect(0,H*0.6,W,H*0.4);
+  ctx.fillStyle = '#6A7A80'; ctx.fillRect(0,H*0.6,W,5);
+
+  // Sidewalk
+  ctx.fillStyle = '#C0C8D0'; ctx.fillRect(0,H*0.57,W,H*0.05);
+  ctx.fillStyle = '#A8B4BC';
+  for(let x=0;x<W;x+=48){ ctx.fillRect(x,H*0.57,40,3); }
+
+  // === GYM BUILDING ===
+  const gx=W*0.1, gy=H*0.1, gw=W*0.65, gh=H*0.5;
+  ctx.fillStyle='rgba(0,0,0,0.2)'; ctx.fillRect(gx+6,gy+6,gw,gh);
+  ctx.fillStyle='#788898'; ctx.fillRect(gx,gy+gh*0.08,gw,gh*0.92);
+
+  // Metal panel pattern
+  ctx.fillStyle='rgba(255,255,255,0.05)';
+  for(let py=0;py<gh;py+=32){ ctx.fillRect(gx,gy+gh*0.08+py,gw,2); }
+  for(let px=0;px<gw;px+=64){ ctx.fillRect(gx+px,gy+gh*0.08,2,gh); }
+
+  // Roof (flat with overhang)
+  ctx.fillStyle='#4A5A6A'; ctx.fillRect(gx-12,gy,gw+24,gh*0.1);
+  ctx.fillStyle='#3A4A5A'; ctx.fillRect(gx-12,gy,gw+24,6);
+
+  // Big windows / glass panels
+  [[0.04,0.25],[0.3,0.25],[0.56,0.25]].forEach(([wfx,wfw])=>{
+    const wx2=gx+gw*wfx, wy2=gy+gh*0.15, ww2=gw*wfw, wh2=gh*0.3;
+    ctx.fillStyle='#90B8D0'; ctx.fillRect(wx2,wy2,ww2,wh2);
+    ctx.strokeStyle='#4A6080'; ctx.lineWidth=3; ctx.strokeRect(wx2,wy2,ww2,wh2);
+    ctx.fillStyle='rgba(255,255,255,0.2)'; ctx.fillRect(wx2+4,wy2+4,ww2*0.3,wh2-8);
+  });
+
+  // "GYM" sign
+  ctx.fillStyle='#2A3A4A'; ctx.fillRect(gx+gw*0.35,gy+gh*0.51,gw*0.3,gh*0.1);
+  ctx.fillStyle='#F5C842';
+  ctx.font = vtFont(Math.max(14,H*0.028));
+  ctx.textAlign='center';
+  ctx.fillText('FIT BODY GYM', gx+gw*0.5, gy+gh*0.57);
+
+  // Main entrance
+  const ex=gx+gw*0.38, ey=gy+gh*0.62, ew=gw*0.24, eh=gh*0.38;
+  ctx.fillStyle='#2A4060'; ctx.fillRect(ex,ey,ew,eh);
+  ctx.strokeStyle='#4A80A0'; ctx.lineWidth=2; ctx.strokeRect(ex,ey,ew,eh);
+  // Glass door
+  ctx.fillStyle='rgba(144,184,208,0.5)'; ctx.fillRect(ex+4,ey+4,ew/2-6,eh-4);
+  ctx.fillRect(ex+ew/2+2,ey+4,ew/2-6,eh-4);
+
+  // Dumbbells outside (pixel)
+  const drawDbell = (x,y) => {
+    ctx.fillStyle='#5A6A7A';
+    ctx.fillRect(x,y,8,8); ctx.fillRect(x+20,y,8,8);
+    ctx.fillStyle='#3A4A5A'; ctx.fillRect(x+6,y+2,16,4);
+  };
+  drawDbell(gx+gw*0.78, gy+gh*0.82);
+  drawDbell(gx+gw*0.82, gy+gh*0.78);
+
+  drawTree(ctx,W*0.04,H*0.3,0.85);
+  drawTree(ctx,W*0.78,H*0.32,0.8);
+  ctx.textAlign='left';
+});
+
+/* -------- GYM INSIDE -------- */
+reg('gym_inside', (ctx, W, H) => {
+  // Interior: gym floor/walls
+  ctx.fillStyle = '#2A2020'; ctx.fillRect(0,0,W,H);
+  // Ceiling
+  ctx.fillStyle = '#1A1A1A'; ctx.fillRect(0,0,W,H*0.12);
+  // Lights
+  for(let lx=W*0.15;lx<W;lx+=W*0.25){
+    ctx.fillStyle='#FFFFC0'; ctx.fillRect(lx,4,60,12);
+    ctx.fillStyle='rgba(255,255,200,0.12)';
+    ctx.beginPath(); ctx.ellipse(lx+30,H*0.15,80,H*0.2,0,0,Math.PI*2); ctx.fill();
+  }
+  // Wall
+  ctx.fillStyle='#3A3030'; ctx.fillRect(0,H*0.12,W,H*0.55);
+  // Mirrors
+  ctx.fillStyle='#6080A0';
+  ctx.fillRect(W*0.05,H*0.14,W*0.3,H*0.4);
+  ctx.fillRect(W*0.55,H*0.14,W*0.4,H*0.4);
+  ctx.strokeStyle='#8090A0'; ctx.lineWidth=3;
+  ctx.strokeRect(W*0.05,H*0.14,W*0.3,H*0.4);
+  ctx.strokeRect(W*0.55,H*0.14,W*0.4,H*0.4);
+  // Reflection shimmer
+  ctx.fillStyle='rgba(255,255,255,0.08)';
+  ctx.fillRect(W*0.06,H*0.15,W*0.04,H*0.38);
+  ctx.fillRect(W*0.56,H*0.15,W*0.04,H*0.38);
+  // Floor
+  ctx.fillStyle='#1A1210'; ctx.fillRect(0,H*0.67,W,H*0.33);
+  // Floor lines
+  ctx.strokeStyle='rgba(255,255,255,0.06)'; ctx.lineWidth=2;
+  for(let fy=H*0.67;fy<H;fy+=20){ ctx.beginPath(); ctx.moveTo(0,fy); ctx.lineTo(W,fy); ctx.stroke(); }
+  // Equipment silhouettes
+  ctx.fillStyle='#3A2828';
+  // Treadmills
+  [[0.08,0.67],[0.22,0.67],[0.36,0.67]].forEach(([ex2,ey2])=>{
+    ctx.fillRect(W*ex2,H*ey2,W*0.1,H*0.08);
+    ctx.fillStyle='#2A1A1A'; ctx.fillRect(W*ex2+4,H*ey2-H*0.08,W*0.08,H*0.09);
+    ctx.fillStyle='#3A2828';
+  });
+  // Weight racks
+  ctx.fillStyle='#2A2828';
+  ctx.fillRect(W*0.6,H*0.52,W*0.35,H*0.14);
+  for(let w=0;w<8;w++){
+    ctx.fillStyle=['#808080','#909090','#707070','#A0A0A0'][w%4];
+    ctx.fillRect(W*0.61+w*W*0.04,H*0.54,W*0.03,H*0.1);
+  }
+  ctx.textAlign='left';
+});
+
+/* -------- SCENE: JOLLIBEE OUTSIDE -------- */
+reg('jollibee', (ctx, W, H) => {
+  // Sky warm afternoon
+  const skyGrad = ctx.createLinearGradient(0,0,0,H*0.6);
+  skyGrad.addColorStop(0,'#FF9A3C');
+  skyGrad.addColorStop(1,'#FFD080');
+  ctx.fillStyle=skyGrad; ctx.fillRect(0,0,W,H*0.6);
+
+  drawCloud(ctx,W*0.15,H*0.07,0.9);
+  drawCloud(ctx,W*0.55,H*0.05,0.7);
+
+  ctx.fillStyle='#808080'; ctx.fillRect(0,H*0.6,W,H*0.4);
+  ctx.fillStyle='#606060'; ctx.fillRect(0,H*0.6,W,5);
+  // Road markings
+  ctx.fillStyle='rgba(255,255,255,0.5)';
+  for(let x=0;x<W;x+=60){ ctx.fillRect(x,H*0.78,40,5); }
+
+  // === JOLLIBEE BUILDING ===
+  const jx=W*0.15, jy=H*0.06, jw=W*0.6, jh=H*0.57;
+  ctx.fillStyle='rgba(0,0,0,0.2)'; ctx.fillRect(jx+6,jy+6,jw,jh);
+
+  // Main body
+  ctx.fillStyle='#E30613'; ctx.fillRect(jx,jy+jh*0.12,jw,jh*0.88);
+  // Stripe
+  ctx.fillStyle='#FFC300'; ctx.fillRect(jx,jy+jh*0.38,jw,jh*0.06);
+  ctx.fillStyle='#FF0000'; ctx.fillRect(jx,jy+jh*0.42,jw,2);
+
+  // Roof (curved-ish via steps)
+  ctx.fillStyle='#C00000';
+  ctx.fillRect(jx,jy,jw,jh*0.14);
+  ctx.fillStyle='#FFC300';
+  ctx.fillRect(jx,jy+jh*0.12,jw,6);
+  // Roof peak
+  ctx.fillStyle='#E30613';
+  ctx.beginPath();
+  ctx.moveTo(jx+jw*0.35,jy);
+  ctx.lineTo(jx+jw*0.5,jy-H*0.06);
+  ctx.lineTo(jx+jw*0.65,jy);
+  ctx.fill();
+
+  // JOLLIBEE LOGO area
+  ctx.fillStyle='#FFC300'; ctx.fillRect(jx+jw*0.3,jy+jh*0.01,jw*0.4,jh*0.11);
+  ctx.fillStyle='#E30613';
+  ctx.font = 'bold '+vtFont(Math.max(14,H*0.03));
+  ctx.textAlign='center';
+  ctx.fillText('Jollibee', jx+jw*0.5, jy+jh*0.09);
+
+  // Mascot (simplified pixel bee)
+  const mx=jx+jw*0.42, my=jy-H*0.04;
+  // Body
+  ctx.fillStyle='#FFC300'; ctx.fillRect(mx,my,30,28);
+  // Head
+  ctx.fillStyle='#FFC300'; ctx.fillRect(mx+4,my-18,22,20);
+  // Eyes
+  ctx.fillStyle='#1A1A2E'; ctx.fillRect(mx+6,my-14,6,6); ctx.fillRect(mx+16,my-14,6,6);
+  ctx.fillStyle='#fff'; ctx.fillRect(mx+7,my-13,3,3); ctx.fillRect(mx+17,my-13,3,3);
+  // Smile
+  ctx.fillStyle='#C00000'; ctx.fillRect(mx+8,my-8,14,3);
+  ctx.fillRect(mx+7,my-6,2,4); ctx.fillRect(mx+21,my-6,2,4);
+  // Chef hat
+  ctx.fillStyle='#fff'; ctx.fillRect(mx+6,my-28,18,12);
+  ctx.fillRect(mx+10,my-34,10,8);
+  // Wings
+  ctx.fillStyle='rgba(255,255,255,0.7)';
+  ctx.fillRect(mx-12,my+2,14,12); ctx.fillRect(mx+28,my+2,14,12);
+
+  // Big windows
+  [[0.04,0.18],[0.5,0.18]].forEach(([wfx,wfw])=>{
+    const wx2=jx+jw*wfx, wy2=jy+jh*0.46, ww2=jw*wfw, wh2=jh*0.38;
+    ctx.fillStyle='#FFF0B8'; ctx.fillRect(wx2,wy2,ww2,wh2);
+    ctx.strokeStyle='#FFC300'; ctx.lineWidth=3; ctx.strokeRect(wx2,wy2,ww2,wh2);
+    // Inside silhouettes
+    ctx.fillStyle='rgba(150,80,20,0.3)';
+    ctx.fillRect(wx2+8,wy2+wh2*0.5,ww2*0.6,wh2*0.5);
+  });
+
+  // Main door
+  const ex=jx+jw*0.38, ey=jy+jh*0.56, ew=jw*0.24, eh=jh*0.44;
+  ctx.fillStyle='rgba(255,220,100,0.4)'; ctx.fillRect(ex,ey,ew,eh);
+  ctx.strokeStyle='#FFC300'; ctx.lineWidth=3; ctx.strokeRect(ex,ey,ew,eh);
+  ctx.fillStyle='#FFC300'; ctx.fillRect(ex+ew/2-2,ey+4,4,eh-4);
+
+  // Parking lines
+  ctx.strokeStyle='rgba(255,255,255,0.3)'; ctx.lineWidth=2;
+  for(let px=W*0.05;px<W*0.14;px+=30){ ctx.beginPath(); ctx.moveTo(px,H*0.66); ctx.lineTo(px,H*0.75); ctx.stroke(); }
+
+  // Sign on pole
+  ctx.fillStyle='#FFC300'; ctx.fillRect(jx+jw*1.02,jy+jh*0.2,60,24);
+  ctx.fillStyle='#E30613';
+  ctx.font=vtFont(Math.max(10,H*0.018)); ctx.textAlign='center';
+  ctx.fillText('DRIVE THRU', jx+jw*1.02+30, jy+jh*0.2+17);
+
+  ctx.textAlign='left';
+});
+
+/* -------- JOLLIBEE INSIDE -------- */
+reg('jollibee_inside', (ctx, W, H) => {
+  // Warm interior
+  ctx.fillStyle='#2A1510'; ctx.fillRect(0,0,W,H);
+  // Ceiling with lights
+  ctx.fillStyle='#3A2010'; ctx.fillRect(0,0,W,H*0.1);
+  // Pendant lights
+  for(let lx=W*0.15;lx<W;lx+=W*0.2){
+    ctx.fillStyle='#2A1A08'; ctx.fillRect(lx,0,4,H*0.08);
+    ctx.fillStyle='#FFD080'; ctx.fillRect(lx-14,H*0.08,32,18);
+    ctx.fillStyle='rgba(255,200,80,0.2)';
+    ctx.beginPath(); ctx.ellipse(lx+2,H*0.2,60,H*0.18,0,0,Math.PI*2); ctx.fill();
+  }
+  // Walls
+  ctx.fillStyle='#C00000'; ctx.fillRect(0,H*0.1,W,H*0.08);
+  ctx.fillStyle='#FFC300'; ctx.fillRect(0,H*0.18,W,6);
+  ctx.fillStyle='#8A1A08'; ctx.fillRect(0,H*0.24,W,H*0.4);
+  // Tile pattern wall
+  ctx.fillStyle='rgba(255,180,0,0.08)';
+  for(let wy2=H*0.24;wy2<H*0.64;wy2+=24){
+    for(let wx2=0;wx2<W;wx2+=32){ ctx.fillRect(wx2+2,wy2+2,28,20); }
+  }
+
+  // Floor
+  ctx.fillStyle='#1A0C06'; ctx.fillRect(0,H*0.64,W,H*0.36);
+  // Tile floor
+  ctx.strokeStyle='rgba(180,100,20,0.15)'; ctx.lineWidth=1;
+  for(let fy=H*0.64;fy<H;fy+=20){ ctx.beginPath(); ctx.moveTo(0,fy); ctx.lineTo(W,fy); ctx.stroke(); }
+  for(let fx=0;fx<W;fx+=20){ ctx.beginPath(); ctx.moveTo(fx,H*0.64); ctx.lineTo(fx,H); ctx.stroke(); }
+
+  // Booth / table
+  const tx=W*0.3, ty=H*0.52, tw=W*0.4, th=H*0.08;
+  ctx.fillStyle='#C08040'; ctx.fillRect(tx,ty,tw,th);
+  ctx.strokeStyle='#A06030'; ctx.lineWidth=2; ctx.strokeRect(tx,ty,tw,th);
+  // Seats
+  ctx.fillStyle='#E03020'; ctx.fillRect(tx-W*0.05,ty+th,W*0.12,H*0.06);
+  ctx.fillRect(tx+tw-W*0.07,ty+th,W*0.12,H*0.06);
+  // Food on table
+  // Burger
+  ctx.fillStyle='#C08040'; ctx.fillRect(tx+tw*0.2,ty-14,28,8);
+  ctx.fillStyle='#8B4513'; ctx.fillRect(tx+tw*0.2+2,ty-8,24,6);
+  ctx.fillStyle='#4CAF50'; ctx.fillRect(tx+tw*0.2+2,ty-4,24,4);
+  ctx.fillStyle='#C08040'; ctx.fillRect(tx+tw*0.2,ty,28,6);
+  // Fries
+  ctx.fillStyle='#FFC300'; ctx.fillRect(tx+tw*0.55,ty-18,6,16); ctx.fillRect(tx+tw*0.56+8,ty-14,6,12); ctx.fillRect(tx+tw*0.56+16,ty-16,6,14);
+  ctx.fillStyle='#E03020'; ctx.fillRect(tx+tw*0.54,ty-2,24,8);
+  // Drinks (Jollibee cups)
+  ctx.fillStyle='#E03020'; ctx.fillRect(tx+tw*0.75,ty-20,14,22);
+  ctx.fillStyle='#FFC300'; ctx.fillRect(tx+tw*0.75,ty-20,14,6);
+  ctx.fillStyle='#1A1A2E'; ctx.fillRect(tx+tw*0.76+2,ty-22,4,4);
+
+  // Menu board back
+  ctx.fillStyle='#C00000'; ctx.fillRect(W*0.1,H*0.1,W*0.8,H*0.12);
+  ctx.fillStyle='#FFC300';
+  ctx.font=vtFont(Math.max(12,H*0.022)); ctx.textAlign='center';
+  ctx.fillText('CHICKENJOY  PALABOK  JOLLY HOTDOG  PEACH MANGO PIE', W/2, H*0.17);
+
+  // Window to outside
+  ctx.fillStyle='#FFF0B8'; ctx.fillRect(W*0.04,H*0.28,W*0.18,H*0.28);
+  const wg=ctx.createLinearGradient(W*0.04,0,W*0.22,0);
+  wg.addColorStop(0,'rgba(255,180,50,0.3)'); wg.addColorStop(1,'transparent');
+  ctx.fillStyle=wg; ctx.fillRect(0,H*0.25,W*0.25,H*0.4);
+
+  ctx.textAlign='left';
+});
+
+/* -------- SCENE: ROAD (truck) -------- */
+reg('road', (ctx, W, H) => {
+  const skyGrad = ctx.createLinearGradient(0,0,0,H*0.5);
+  skyGrad.addColorStop(0,'#6090A8');
+  skyGrad.addColorStop(1,'#90B8C8');
+  ctx.fillStyle=skyGrad; ctx.fillRect(0,0,W,H*0.5);
+  ctx.fillStyle='#707070'; ctx.fillRect(0,H*0.5,W,H*0.5);
+  ctx.fillStyle='#505050'; ctx.fillRect(0,H*0.5,W,6);
+  // Road lines
+  ctx.fillStyle='#F0E060';
+  for(let x=0;x<W;x+=80){ ctx.fillRect(x,H*0.72,50,6); }
+  ctx.fillStyle='rgba(255,255,255,0.3)';
+  ctx.fillRect(0,H*0.5,W,4);
+  // Sidewalk
+  ctx.fillStyle='#B0B8C0'; ctx.fillRect(0,H*0.44,W,H*0.07);
+  ctx.fillStyle='#A0A8B0'; ctx.fillRect(0,H*0.44,W,3);
+  // Buildings in back
+  [0.02,0.18,0.34,0.5,0.66,0.78,0.88].forEach((bfx,i)=>{
+    const bh2=H*(0.2+i*0.03);
+    ctx.fillStyle=['#8090A0','#7080A0','#90A0B0','#6070A0'][i%4];
+    ctx.fillRect(W*bfx,H*0.44-bh2,W*0.1,bh2);
+    ctx.fillStyle='rgba(255,240,150,0.3)';
+    for(let wy2=4;wy2<bh2-4;wy2+=12){
+      for(let wx2=4;wx2<W*0.08;wx2+=12){ if(Math.random()>.4) ctx.fillRect(W*bfx+wx2,H*0.44-bh2+wy2,8,8); }
+    }
+  });
+  drawCloud(ctx,W*0.2,H*0.04,0.8);
+  ctx.textAlign='left';
+});
+
+/* -------- SCENE: BEACH SUNSET -------- */
+reg('beach', (ctx, W, H) => {
+  // Rich sunset sky
+  const skyGrad = ctx.createLinearGradient(0,0,0,H*0.62);
+  skyGrad.addColorStop(0,'#0d0221');
+  skyGrad.addColorStop(0.1,'#3d1c52');
+  skyGrad.addColorStop(0.25,'#7a2d6e');
+  skyGrad.addColorStop(0.4,'#c45e3e');
+  skyGrad.addColorStop(0.55,'#e8a040');
+  skyGrad.addColorStop(0.65,'#f5c842');
+  ctx.fillStyle=skyGrad; ctx.fillRect(0,0,W,H*0.62);
+
+  // Stars (early ones)
+  [[0.08,0.04],[0.2,0.06],[0.78,0.03],[0.9,0.08],[0.6,0.05]].forEach(([sx,sy])=>{
+    drawStar(ctx,W*sx,H*sy,2,0.6);
+  });
+
+  // SUN (setting on horizon)
+  const sunX=W*0.5, sunY=H*0.6;
+  // Glow rings
+  [80,60,40,24].forEach((r,i)=>{
+    ctx.fillStyle=`rgba(255,${180-i*20},${80-i*15},${0.08+i*0.04})`;
+    ctx.beginPath(); ctx.arc(sunX,sunY,r,0,Math.PI*2); ctx.fill();
+  });
+  ctx.fillStyle='#FFE060';
+  ctx.beginPath(); ctx.arc(sunX,sunY,20,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#FFF080';
+  ctx.beginPath(); ctx.arc(sunX,sunY,12,0,Math.PI*2); ctx.fill();
+
+  // Clouds with sunset color
+  const drawSunCloud=(x,y,s,tint)=>{
+    ctx.fillStyle=tint||'rgba(255,180,100,0.7)';
+    [[0,10,36,14],[8,4,26,16],[22,2,32,18],[46,7,22,13]].forEach(([dx,dy,dw,dh])=>{
+      ctx.fillRect(Math.round(x+dx*s),Math.round(y+dy*s),Math.round(dw*s),Math.round(dh*s));
+    });
+  };
+  drawSunCloud(W*0.05,H*0.1,1.1,'rgba(200,100,120,0.7)');
+  drawSunCloud(W*0.65,H*0.08,0.9,'rgba(220,140,80,0.7)');
+  drawSunCloud(W*0.3,H*0.15,0.7,'rgba(180,80,140,0.6)');
+
+  // Sea
+  const seaGrad=ctx.createLinearGradient(0,H*0.62,0,H);
+  seaGrad.addColorStop(0,'#1E6090');
+  seaGrad.addColorStop(0.3,'#1248A0');
+  seaGrad.addColorStop(1,'#0820508');
+  ctx.fillStyle=seaGrad; ctx.fillRect(0,H*0.62,W,H*0.38);
+
+  // Sun reflection on water
+  const refGrad=ctx.createLinearGradient(sunX-80,H*0.62,sunX+80,H*0.62);
+  refGrad.addColorStop(0,'transparent');
+  refGrad.addColorStop(0.5,'rgba(255,200,80,0.4)');
+  refGrad.addColorStop(1,'transparent');
+  ctx.fillStyle=refGrad;
+  for(let wy2=H*0.62;wy2<H;wy2+=8){
+    const ww=80*(1+(wy2-H*0.62)/(H*0.38))*0.8;
+    ctx.fillRect(sunX-ww/2,wy2,ww,5);
+  }
+
+  // Waves
+  ctx.strokeStyle='rgba(150,200,255,0.3)'; ctx.lineWidth=3;
+  [0.66,0.72,0.78,0.85,0.92].forEach(wy3=>{
+    ctx.beginPath();
+    for(let wx3=0;wx3<W;wx3+=40){
+      ctx.quadraticCurveTo(wx3+10,H*wy3-8,wx3+20,H*wy3);
+      ctx.quadraticCurveTo(wx3+30,H*wy3+8,wx3+40,H*wy3);
+    }
+    ctx.stroke();
+  });
+
+  // Sand/shore
+  const sandGrad=ctx.createLinearGradient(0,H*0.6,0,H*0.72);
+  sandGrad.addColorStop(0,'#D4A060');
+  sandGrad.addColorStop(1,'#C49050');
+  ctx.fillStyle=sandGrad; ctx.fillRect(0,H*0.59,W,H*0.12);
+
+  // Horizon shimmer
+  ctx.fillStyle='rgba(255,200,80,0.15)';
+  ctx.fillRect(0,H*0.61,W,4);
+
+  // Palm trees silhouette
+  const drawPalm=(px,py,size)=>{
+    ctx.fillStyle='rgba(20,10,5,0.😎';
+    ctx.fillRect(px,py,size*0.08,size*0.8);
+    const leaveDirs=[[-1.2,-0.6],[-0.6,-1.0],[0.2,-1.1],[0.8,-0.8],[1.3,-0.4]];
+    leaveDirs.forEach(([lx,ly])=>{
+      ctx.fillRect(px+size*0.04+lx*size*0.3, py+ly*size*0.3, size*0.35, size*0.04);
+      ctx.fillRect(px+size*0.04+lx*size*0.2, py+ly*size*0.2, size*0.04, size*0.25);
+    });
+  };
+  drawPalm(W*0.05, H*0.32, H*0.28);
+  drawPalm(W*0.82, H*0.3, H*0.26);
+  drawPalm(W*0.88, H*0.36, H*0.22);
+
+  // Wedding arch (for happy ending)
+  // Arch posts
+  ctx.fillStyle='rgba(255,240,200,0.9)';
+  ctx.fillRect(W*0.36,H*0.35,8,H*0.28);
+  ctx.fillRect(W*0.64,H*0.35,8,H*0.28);
+  // Arch top (curved via rects)
+  ctx.fillStyle='rgba(255,240,200,0.85)';
+  for(let ai=0;ai<16;ai++){
+    const angle=Math.PI+ai*(Math.PI/15);
+    const ax=W*0.5+Math.cos(angle)*W*0.14;
+    const ay=H*0.38+Math.sin(angle)*H*0.08;
+    ctx.fillRect(ax-4,ay-4,10,10);
+  }
+  // Flowers on arch
+  ['#FFB8C0','#FFD0E0','#FFF0F8','#FFCCE0'].forEach((fc,i)=>{
+    const fa=Math.PI+(i+1)*(Math.PI/5);
+    const fx=W*0.5+Math.cos(fa)*W*0.14;
+    const fy=H*0.38+Math.sin(fa)*H*0.08;
+    ctx.fillStyle=fc; ctx.fillRect(fx-6,fy-6,14,14);
+    ctx.fillStyle='#FFE070'; ctx.fillRect(fx-2,fy-2,6,6);
+  });
+  // Flowers arch sides
+  [H*0.38,H*0.44,H*0.5,H*0.56].forEach((fy,i)=>{
+    ctx.fillStyle=['#FFB8C0','#FF90B8','#FFD0E0','#FFAAC8'][i];
+    ctx.fillRect(W*0.356-8,fy,16,14); ctx.fillRect(W*0.64-2,fy,16,14);
+  });
+
+  // Aisle carpet
+  ctx.fillStyle='rgba(220,100,120,0.6)'; ctx.fillRect(W*0.44,H*0.62,W*0.12,H*0.12);
+  // Rose petals scattered
+  ['#FFB8C0','#E86880','#FF90A8'].forEach((pc,pi)=>{
+    ctx.fillStyle=pc;
+    for(let rp=0;rp<5;rp++){
+      ctx.fillRect(W*(0.35+pi*0.05+rp*0.02),H*(0.64+rp*0.01),(3+pi),4);
+    }
+  });
+
+  ctx.textAlign='left';
+});
+
+/* ============================================================
+   PIXEL CHARACTER RENDERER
+   ============================================================ */
+function drawCharacter(canvasEl, type, emotion) {
+  const c = canvasEl.getContext('2d');
+  c.imageSmoothingEnabled = false;
+  const W = canvasEl.width, H = canvasEl.height;
+  c.clearRect(0,0,W,H);
+
+  const isMatt = type === 'matt';
+  const isMilca = type === 'milca';
+  const isTruck = type === 'truck';
+
+  if(isTruck){
+    // PIXEL TRUCK
+    c.fillStyle='#3A6090'; c.fillRect(10,40,140,80);
+    c.fillStyle='#2A5080'; c.fillRect(10,40,60,80);
+    c.fillStyle='#70B8D8'; c.fillRect(14,44,52,36);
+    c.fillStyle='#FFF070'; c.fillRect(62,64,20,18);
+    c.fillStyle='#FF4444'; c.fillRect(138,60,8,8);
+    c.fillStyle='#1A1A1A'; c.fillRect(24,108,24,24); c.fillRect(108,108,24,24);
+    c.fillStyle='#808080'; c.fillRect(30,114,12,12); c.fillRect(114,114,12,12);
+    c.fillStyle='#5A8AB0'; c.fillRect(8,60,4,30);
+    return;
+  }
+
+  // Scale for canvas size
+  const scale = W/80;
+  const s = scale;
+
+  // MILCA
+  if(isMilca){
+    // Shoes
+    c.fillStyle='#3A2A1A';
+    c.fillRect(22*s,142*s,14*s,8*s); c.fillRect(44*s,142*s,14*s,8*s);
+    // Legs (uniform skirt)
+    c.fillStyle='#1A3A6A';
+    c.fillRect(24*s,110*s,12*s,34*s); c.fillRect(44*s,110*s,12*s,34*s);
+    // School skirt
+    c.fillStyle='#1A3A6A';
+    c.fillRect(18*s,92*s,44*s,22*s);
+    c.fillStyle='#1A2A5A';
+    c.fillRect(18*s,92*s,44*s,4*s);
+    // White shirt/blouse
+    c.fillStyle='#F8F8F0';
+    c.fillRect(18*s,60*s,44*s,36*s);
+    // Collar (blue)
+    c.fillStyle='#1A3A6A';
+    c.fillRect(26*s,60*s,8*s,14*s); c.fillRect(46*s,60*s,8*s,14*s);
+    c.fillRect(30*s,68*s,20*s,6*s);
+    // Arms
+    c.fillStyle='#F5D0A8';
+    c.fillRect(6*s,62*s,14*s,36*s); c.fillRect(60*s,62*s,14*s,36*s);
+    // Hands
+    c.fillStyle='#F0C898';
+    c.fillRect(8*s,96*s,10*s,10*s); c.fillRect(62*s,96*s,10*s,10*s);
+
+    // Emotion-based arm pose
+    if(emotion==='happy'||emotion==='love'){
+      c.fillStyle='#F5D0A8'; c.fillRect(6*s,56*s,14*s,12*s);
+    }
+
+    // Neck
+    c.fillStyle='#F5D0A8'; c.fillRect(32*s,46*s,16*s,16*s);
+    // Head
+    c.fillStyle='#F5D0A8'; c.fillRect(22*s,22*s,36*s,30*s);
+    // Hair (long, black)
+    c.fillStyle='#1A1010';
+    c.fillRect(20*s,18*s,40*s,20*s); // top hair
+    c.fillRect(16*s,20*s,10*s,50*s); // left side hair long
+    c.fillRect(54*s,20*s,10*s,50*s); // right side hair long
+    c.fillRect(18*s,18*s,44*s,8*s);  // bangs
+    // Hair shine
+    c.fillStyle='rgba(255,255,255,0.15)';
+    c.fillRect(26*s,20*s,8*s,6*s);
+
+    // Eyes
+    if(emotion==='sad'||emotion==='cry'){
+      c.fillStyle='#1A1010'; c.fillRect(28*s,32*s,8*s,6*s); c.fillRect(44*s,32*s,8*s,6*s);
+      c.fillStyle='rgba(100,160,255,0.7)'; c.fillRect(30*s,38*s,4*s,8*s); c.fillRect(46*s,38*s,4*s,8*s);
+    } else if(emotion==='love'){
+      c.fillStyle='#E83060'; c.fillRect(28*s,30*s,8*s,8*s); c.fillRect(44*s,30*s,8*s,8*s);
+      c.fillStyle='#FF80A0'; c.fillRect(30*s,32*s,4*s,4*s); c.fillRect(46*s,32*s,4*s,4*s);
+    } else {
+      c.fillStyle='#1A1010'; c.fillRect(28*s,30*s,8*s,8*s); c.fillRect(44*s,30*s,8*s,8*s);
+      c.fillStyle='#fff'; c.fillRect(30*s,32*s,3*s,3*s); c.fillRect(46*s,32*s,3*s,3*s);
+    }
+
+    // Mouth
+    if(emotion==='happy'||emotion==='love'){
+      c.fillStyle='#D46080'; c.fillRect(32*s,42*s,16*s,6*s);
+      c.fillStyle='#fff'; c.fillRect(34*s,43*s,12*s,3*s);
+    } else if(emotion==='sad'||emotion==='cry'){
+      c.fillStyle='#D46080'; c.fillRect(32*s,44*s,16*s,4*s);
+      c.fillStyle='rgba(0,0,0,0.1)'; c.fillRect(34*s,46*s,12*s,2*s);
+    } else {
+      c.fillStyle='#D46080'; c.fillRect(32*s,42*s,16*s,4*s);
+    }
+
+    // Cheeks
+    c.fillStyle='rgba(255,160,180,0.35)';
+    c.fillRect(22*s,36*s,8*s,6*s); c.fillRect(50*s,36*s,8*s,6*s);
+
+    // Bow/ribbon in hair
+    c.fillStyle='#E83060';
+    c.fillRect(22*s,20*s,12*s,8*s); c.fillRect(46*s,20*s,12*s,8*s);
+    c.fillStyle='#C01040'; c.fillRect(34*s,22*s,12*s,6*s);
+
+    // Wedding dress (special)
+    if(emotion==='wedding'){
+      c.fillStyle='#F8F4FF';
+      c.fillRect(14*s,88*s,52*s,62*s);
+      c.fillStyle='rgba(255,255,255,0.5)';
+      for(let lacy=0;lacy<5;lacy++){ c.fillRect(14*s,88*s+lacy*12*s,52*s,4*s); }
+      c.fillStyle='#FFB8C8'; c.fillRect(34*s,22*s,12*s,6*s);
+      c.fillStyle='#E83060';
+      c.fillRect(20*s,16*s,14*s,10*s); c.fillRect(46*s,16*s,14*s,10*s);
+      // Veil
+      c.fillStyle='rgba(255,255,255,0.4)';
+      c.fillRect(16*s,14*s,48*s,60*s);
+      c.fillStyle='rgba(255,255,255,0.6)';
+      c.fillRect(18*s,14*s,10*s,4*s); c.fillRect(52*s,14*s,10*s,4*s);
+    }
+  }
+
+  // MATT
+  if(isMatt){
+    // Shoes
+    c.fillStyle='#1A1010';
+    c.fillRect(20*s,142*s,16*s,8*s); c.fillRect(44*s,142*s,16*s,8*s);
+    // Pants
+    c.fillStyle='#2A3A5A';
+    c.fillRect(22*s,100*s,12*s,44*s); c.fillRect(46*s,100*s,12*s,44*s);
+    // Belt
+    c.fillStyle='#3A2A1A'; c.fillRect(18*s,97*s,44*s,6*s);
+    c.fillStyle='#C0A040'; c.fillRect(36*s,97*s,8*s,6*s);
+    // School polo (white)
+    c.fillStyle='#F0F0E8'; c.fillRect(18*s,60*s,44*s,40*s);
+    c.fillStyle='#1A3A6A';
+    c.fillRect(26*s,60*s,8*s,14*s); c.fillRect(46*s,60*s,8*s,14*s);
+    c.fillRect(30*s,70*s,20*s,4*s);
+    // Buttons
+    c.fillStyle='#A0A0A0';
+    [72,80,88].forEach(by2=>c.fillRect(39*s,by2*s,3*s,3*s));
+    // Arms
+    c.fillStyle='#E8C090';
+    c.fillRect(4*s,62*s,16*s,38*s); c.fillRect(60*s,62*s,16*s,38*s);
+    c.fillStyle='#D8B080';
+    c.fillRect(6*s,96*s,12*s,10*s); c.fillRect(62*s,96*s,12*s,10*s);
+
+    // Emotion arm
+    if(emotion==='happy'||emotion==='love'){
+      c.fillStyle='#E8C090'; c.fillRect(4*s,56*s,16*s,12*s);
+    }
+
+    // Neck
+    c.fillStyle='#E8C090'; c.fillRect(32*s,46*s,16*s,16*s);
+    // Head
+    c.fillStyle='#E8C090'; c.fillRect(22*s,18*s,36*s,32*s);
+    // Ear
+    c.fillStyle='#D8B080'; c.fillRect(20*s,26*s,4*s,10*s); c.fillRect(56*s,26*s,4*s,10*s);
+    // Hair (short, dark brown)
+    c.fillStyle='#2A1A0A';
+    c.fillRect(20*s,14*s,40*s,14*s);
+    c.fillRect(20*s,14*s,6*s,24*s); c.fillRect(54*s,14*s,6*s,18*s);
+    // Hair styling (side part)
+    c.fillStyle='#3A2A1A'; c.fillRect(28*s,14*s,12*s,10*s);
+    // Hair shine
+    c.fillStyle='rgba(255,255,255,0.12)'; c.fillRect(26*s,16*s,8*s,5*s);
+
+    // Eyes
+    if(emotion==='sad'||emotion==='cry'){
+      c.fillStyle='#1A1010'; c.fillRect(28*s,28*s,8*s,7*s); c.fillRect(44*s,28*s,8*s,7*s);
+      c.fillStyle='rgba(100,160,255,0.7)'; c.fillRect(30*s,35*s,4*s,8*s); c.fillRect(46*s,35*s,4*s,8*s);
+    } else if(emotion==='love'){
+      c.fillStyle='#E83060'; c.fillRect(28*s,28*s,8*s,8*s); c.fillRect(44*s,28*s,8*s,8*s);
+      c.fillStyle='#FF80A0'; c.fillRect(30*s,30*s,4*s,4*s); c.fillRect(46*s,30*s,4*s,4*s);
+    } else {
+      c.fillStyle='#1A1010'; c.fillRect(28*s,28*s,8*s,8*s); c.fillRect(44*s,28*s,8*s,8*s);
+      c.fillStyle='#fff'; c.fillRect(30*s,30*s,3*s,3*s); c.fillRect(46*s,30*s,3*s,3*s);
+    }
+
+    // Nose
+    c.fillStyle='rgba(0,0,0,0.2)'; c.fillRect(37*s,36*s,6*s,3*s);
+
+    // Mouth
+    if(emotion==='happy'||emotion==='love'){
+      c.fillStyle='#C06040'; c.fillRect(30*s,42*s,20*s,6*s);
+      c.fillStyle='#fff'; c.fillRect(32*s,43*s,16*s,3*s);
+    } else if(emotion==='sad'||emotion==='cry'){
+      c.fillStyle='#C06040'; c.fillRect(30*s,44*s,20*s,4*s);
+    } else {
+      c.fillStyle='#C06040'; c.fillRect(30*s,42*s,20*s,4*s);
+    }
+
+    // Wedding barong (special)
+    if(emotion==='wedding'){
+      c.fillStyle='#F8F4E8';
+      c.fillRect(18*s,60*s,44*s,40*s);
+      c.fillStyle='rgba(200,180,100,0.4)';
+      for(let by3=0;by3<8;by3++){ c.fillRect(18*s+by3*6*s,60*s,3*s,40*s); }
+      c.fillStyle='#E8E0D0'; c.fillRect(22*s,60*s,8*s,14*s); c.fillRect(50*s,60*s,8*s,14*s);
+    }
+  }
+}
+
+/* ============================================================
+   GAME STATE
+   ============================================================ */
+let currentScene = 'title';
+let currentScript = 0;
+let autoPlay = false;
+let autoTimer = null;
+let choicesMade = {};
+let dialogueEl, speakerEl, choicesEl;
+let charL, charR;
+let typingTimeout = null;
+let isTyping = false;
+let fullText = '';
+let totalScenes = 0;
+let scenesPlayed = 0;
+
+/* ============================================================
+   DIALOGUE SCRIPT
+   Each entry: { scene, speaker, text, emotion_l, emotion_r,
+                 char_l, char_r, choices, chapter, action }
+   ============================================================ */
+const script = [
+  // ============ CHAPTER 1: SIMULA ============
+  { chapter: 1, chapterName: 'Simula ng Lahat', scene: 'school', speaker: '', text: 'Isang bagong taon ng paaralan. Para kay Matt Cruz, katulad lang ito ng dati... o baka hindi.' },
+  { scene: 'school', speaker: 'Matt', char_l: 'matt', emotion_l: 'neutral', text: 'Haay... Ayaw ko nang pumasok. Wala namang mangyayari dito.' },
+  { scene: 'school', speaker: 'Matt', char_l: 'matt', emotion_l: 'surprised', text: 'Ano—?!' },
+  { scene: 'school', speaker: '', char_l: 'matt', emotion_l: 'surprised', text: 'Isang aklat ang bumagsak mula sa itaas ng hagdanan, direkta sa harap niya...' },
+  { scene: 'school', speaker: 'Milca', char_l: 'matt', char_r: 'milca', emotion_l: 'surprised', emotion_r: 'sad', text: 'Ay! Pasensya na! Naihulog ko kasi ang aking libro! Okay ka lang ba?' },
+  { scene: 'school', speaker: 'Matt', char_l: 'matt', char_r: 'milca', emotion_l: 'neutral', emotion_r: 'sad', text: '...O-oo. Okay lang. Hindi naman ako nasugatan.' },
+  { scene: 'school', speaker: 'Milca', char_l: 'matt', char_r: 'milca', emotion_l: 'neutral', emotion_r: 'happy', text: 'Salamat sa pag-unawa! Ikaw pala ay si Matt? Magkaklase tayo nung third year!' },
+  { scene: 'school', speaker: 'Matt', char_l: 'matt', char_r: 'milca', emotion_l: 'neutral', emotion_r: 'happy', text: '...Ganoon ba? Hindi ko napansin.' },
+  { scene: 'school', speaker: '', char_l: 'matt', char_r: 'milca', emotion_l: 'neutral', emotion_r: 'happy', text: 'Si Milca Santos. Ang batang palaging ngumingiti at palaging may dalang libro. At ngayon... bakit siya naaalala niya nang ganito?' },
+  { scene: 'school', speaker: 'Milca', char_l: 'matt', char_r: 'milca', emotion_l: 'neutral', emotion_r: 'happy', text: 'Sige, kita-kita! Hala, late na tayo!' },
+  { scene: 'school', speaker: 'Matt', char_l: 'matt', emotion_l: 'neutral', text: 'Tumingin siya sa libro na nahulog... "Letters to You" ang pamagat. Kakaiba...' },
+
+  // ============ CHAPTER 2: MGA ARAW SA PAARALAN ============
+  { chapter: 2, chapterName: 'Mga Araw na Hindi Malilimutan', scene: 'school', speaker: '', text: 'Lumipas ang mga linggo. Si Matt ay nagsimulang mapansin ang mga bagay na hindi niya dati napapansin.' },
+  { scene: 'school', speaker: 'Matt', char_l: 'matt', emotion_l: 'happy', text: 'Palagi siyang nauna sa klase. Palagi siyang may dala-dalang meryenda para sa kanyang mga kaibigan. At palagi siyang...' },
+  { scene: 'school', speaker: 'Matt', char_l: 'matt', emotion_l: 'love', text: '...Ngumingiti. Ang pinakagandang ngiti sa buong mundo.' },
+  { scene: 'school', speaker: 'Classmate', char_l: 'matt', char_r: 'milca', emotion_l: 'neutral', emotion_r: 'neutral', text: 'Uy Matt! Dinggin mo, si Milca daw ay scholar! Nag-top ng buong batch!' },
+  { scene: 'school', speaker: 'Matt', char_l: 'matt', char_r: 'milca', emotion_l: 'surprised', emotion_r: 'neutral', text: 'Talaga? Wow...' },
+  { scene: 'school', speaker: 'Milca', char_l: 'matt', char_r: 'milca', emotion_l: 'neutral', emotion_r: 'happy', text: 'Matt! Nagbabasa ka ba ng nobela? Nahiram ko ito sa library, gusto mo ring basahin pagkatapos ko?' },
+  { scene: 'school', speaker: 'Matt', char_l: 'matt', char_r: 'milca', emotion_l: 'happy', emotion_r: 'happy', text: 'Ako? Hm... Sige. Bakit hindi.' },
+  { scene: 'school', speaker: '', char_l: 'matt', char_r: 'milca', emotion_l: 'love', emotion_r: 'happy', text: 'Iyon ang simula ng kanilang pag-uusap na hindi natatapos. Araw-araw, muli at muli.' },
+
+  // ============ GYM ARC ============
+  { chapter: 3, chapterName: 'Palakasan ng Loob', scene: 'gym', speaker: '', text: 'Isang hapon. Nakita ni Milca si Matt na nag-eehersisyo sa labas ng gym.' },
+  { scene: 'gym', speaker: 'Milca', char_l: 'matt', char_r: 'milca', emotion_l: 'neutral', emotion_r: 'happy', text: 'Matt! Nagse-sige ka dito? Hinihintay kita ng grupo para sa project!' },
+  { scene: 'gym', speaker: 'Matt', char_l: 'matt', char_r: 'milca', emotion_l: 'surprised', emotion_r: 'happy', text: 'Ay—nakalimutan ko! Sige na, tayo na!' },
+  { scene: 'gym_inside', speaker: '', char_l: 'matt', char_r: 'milca', emotion_l: 'neutral', emotion_r: 'neutral', text: 'Sa loob ng gym, habang nagtatrabaho sila sa kanilang proyekto...' },
+  { scene: 'gym_inside', speaker: 'Milca', char_l: 'matt', char_r: 'milca', emotion_l: 'neutral', emotion_r: 'sad', text: 'Matt... gusto ko sanang manalo sa essay contest. Pero ayaw ng aking mga magulang.' },
+  { scene: 'gym_inside', speaker: 'Matt', char_l: 'matt', char_r: 'milca', emotion_l: 'neutral', emotion_r: 'sad', text: 'Bakit naman? Magaling ka naman sa pagsusulat.' },
+  { scene: 'gym_inside', speaker: 'Milca', char_l: 'matt', char_r: 'milca', emotion_l: 'neutral', emotion_r: 'sad', text: 'Sabi nila, mag-focus na lang ako sa mga subject. "Wala kang matutupad sa pagsusulat." Ganoon daw.' },
+  { scene: 'gym_inside', speaker: 'Matt', char_l: 'matt', char_r: 'milca', emotion_l: 'happy', emotion_r: 'sad', text: 'Mali sila. Ituloy mo. Makikita nila kung gaano ka kagaling. Naniniwala ako sa iyo, Milca.' },
+  { scene: 'gym_inside', speaker: 'Milca', char_l: 'matt', char_r: 'milca', emotion_l: 'happy', emotion_r: 'happy', text: '...Salamat, Matt. Ito ang kailangan ko marinig.' },
+  { scene: 'gym_inside', speaker: '', char_l: 'matt', char_r: 'milca', emotion_l: 'love', emotion_r: 'love', text: 'Sa sandaling iyon, parehong naramdaman nila ang isang bagay na mahirap ipaliwanag sa salita.' },
+
+  // ============ JOLLIBEE DATE ============
+  { chapter: 4, chapterName: 'Isang Espesyal na Hapon', scene: 'jollibee', speaker: '', text: 'Sabado. Nag-imbitahan si Matt kay Milca para kumain sa Jollibee.' },
+  { scene: 'jollibee', speaker: 'Matt', char_l: 'matt', emotion_l: 'nervous', text: '...Kaya ko ito. Kaya ko ito. Simpleng pagkain lang naman ito. Hindi pa ito date.' },
+  { scene: 'jollibee', speaker: 'Milca', char_l: 'matt', char_r: 'milca', emotion_l: 'surprised', emotion_r: 'happy', text: 'Matt! Matagal ka ba naghintay? Sorry, medyo traffic!' },
+  { scene: 'jollibee', speaker: 'Matt', char_l: 'matt', char_r: 'milca', emotion_l: 'happy', emotion_r: 'happy', text: 'H-hindi, kaarating ko lang din.' },
+  { scene: 'jollibee_inside', speaker: '', char_l: 'matt', char_r: 'milca', emotion_l: 'happy', emotion_r: 'happy', text: 'Sa loob ng Jollibee, puno ng ingay at halakhak ng mga batang kumakain kasama ang kanilang mga pamilya.' },
+  { scene: 'jollibee_inside', speaker: 'Milca', char_l: 'matt', char_r: 'milca', emotion_l: 'happy', emotion_r: 'happy', text: 'Dati palagi akong pumupunta dito kasama ang aking Lola. Chicken Joy lagi ang order namin.' },
+  { scene: 'jollibee_inside', speaker: 'Matt', char_l: 'matt', char_r: 'milca', emotion_l: 'happy', emotion_r: 'happy', text: 'Ako naman, dati bago pa lumipat ng trabaho ang Tatay ko, dito kami lagi tuwing birthday ko.' },
+  { scene: 'jollibee_inside', speaker: 'Milca', char_l: 'matt', char_r: 'milca', emotion_l: 'neutral', emotion_r: 'sad', text: 'Sayang nga... Miss ko na ang Lola ko. Nawala na siya nung 2013.' },
+  { scene: 'jollibee_inside', speaker: 'Matt', char_l: 'matt', char_r: 'milca', emotion_l: 'sad', emotion_r: 'sad', text: 'Pasensya na... Pero sigurado akong alam ng Lola mo kung gaano ka kagaling ngayon.' },
+  { scene: 'jollibee_inside', speaker: 'Milca', char_l: 'matt', char_r: 'milca', emotion_l: 'neutral', emotion_r: 'happy', text: '...Oo nga. Ngumiti nang kaunti. Kaya ba, para sa kanya, itutuloy ko ang essay contest.' },
+  { scene: 'jollibee_inside', speaker: 'Matt', char_l: 'matt', char_r: 'milca', emotion_l: 'happy', emotion_r: 'happy', text: 'Iyan ang gusto kong marinig.' },
+  { scene: 'jollibee_inside', speaker: '', char_l: 'matt', char_r: 'milca', emotion_l: 'love', emotion_r: 'love', text: 'Matagal silang nandoon. Matagal na nagsalita, nagtawanan, at nakipagkwentuhan... hanggang sa hindi na nila napansin na gabi na.' },
+  { scene: 'jollibee_inside', speaker: 'Milca', char_l: 'matt', char_r: 'milca', emotion_l: 'happy', emotion_r: 'happy', text: 'Hala, gabi na! Aakyat ka pa sa jeep?' },
+  { scene: 'jollibee_inside', speaker: 'Matt', char_l: 'matt', char_r: 'milca', emotion_l: 'happy', emotion_r: 'happy', text: 'Sama ko sa iyo. Malapit naman kayo dito, diba?' },
+  { scene: 'jollibee_inside', speaker: 'Milca', char_l: 'matt', char_r: 'milca', emotion_l: 'happy', emotion_r: 'love', text: '...Salamat, Matt. Mabait ka talaga.' },
+
+  // ============ HOUSE SCENE ============
+  { chapter: 5, chapterName: 'Sa Harap ng Tahanan', scene: 'house', speaker: '', text: 'Hapon. Si Matt ay naandoon sa labas ng bahay ni Milca upang ibalik ang libro na hiniram niya.' },
+  { scene: 'house', speaker: 'Matt', char_l: 'matt', emotion_l: 'nervous', text: 'Tinitingnan ang bahay ni Milca. Maaliwalas. Puno ng halaman. Katulad niya.' },
+  { scene: 'house', speaker: 'Milca', char_l: 'matt', char_r: 'milca', emotion_l: 'neutral', emotion_r: 'happy', text: 'Matt! Puntahan mo pa ako, grabe ka! Sali ka na sa meryenda.' },
+  { scene: 'house', speaker: 'Matt', char_l: 'matt', char_r: 'milca', emotion_l: 'surprised', emotion_r: 'happy', text: 'Ah—okay. Kung hindi ka naman maaabala.' },
+  { scene: 'house_night', speaker: '', char_l: 'matt', char_r: 'milca', emotion_l: 'happy', emotion_r: 'happy', text: 'Nanatili si Matt hanggang gabi. Pag-usapan nila ang lahat—ang kanilang mga pangarap, ang kanilang mga takot, ang kanilang mga pamilya.' },
+  { scene: 'house_night', speaker: 'Milca', char_l: 'matt', char_r: 'milca', emotion_l: 'love', emotion_r: 'love', text: 'Matt... masaya ako kapag kasama kita.' },
+  { scene: 'house_night', speaker: 'Matt', char_l: 'matt', char_r: 'milca', emotion_l: 'love', emotion_r: 'love', text: 'Huminto. Huminga ng malalim.' },
+  { scene: 'house_night', speaker: 'Matt', char_l: 'matt', char_r: 'milca', emotion_l: 'love', emotion_r: 'love', text: 'Milca... may sasabihin ako sa iyo. Matagal na akong gusto kang sabihin ito.' },
+  { scene: 'house_night', speaker: 'Milca', char_l: 'matt', char_r: 'milca', emotion_l: 'neutral', emotion_r: 'love', text: '...*Tumahimik. Tumingin sa kanya.*' },
+  { scene: 'house_night', speaker: 'Matt', char_l: 'matt', char_r: 'milca', emotion_l: 'love', emotion_r: 'love', text: 'Gusto kita, Milca. Hindi bilang kaibigan. Gusto kita bilang... higit pa doon.' },
+  { scene: 'house_night', speaker: 'Milca', char_l: 'matt', char_r: 'milca', emotion_l: 'love', emotion_r: 'love', text: '...Matt. Ako rin. Matagal na rin akong naghihintay na sabihin mo iyan.' },
+  { scene: 'house_night', speaker: '', char_l: 'matt', char_r: 'milca', emotion_l: 'love', emotion_r: 'love', text: 'Sa ilalim ng gabi, sa ilaw ng buwan, nagsimula ang isang bagong kabanata sa buhay nila.' },
+
+  // ============ CHAPTER 6: KASIYAHAN ============
+  { chapter: 6, chapterName: 'Mga Araw ng Kasiyahan', scene: 'school', speaker: '', text: 'Mga araw pagkatapos. Si Matt at Milca, magkasama na ngayon.' },
+  { scene: 'school', speaker: 'Matt', char_l: 'matt', char_r: 'milca', emotion_l: 'happy', emotion_r: 'happy', text: 'Milca! Nanalo ka sa essay contest! Nakita ko sa board!' },
+  { scene: 'school', speaker: 'Milca', char_l: 'matt', char_r: 'milca', emotion_l: 'happy', emotion_r: 'happy', text: 'Talaga?! Talaga?! Hindi ako makapaniwala!' },
+  { scene: 'school', speaker: 'Matt', char_l: 'matt', char_r: 'milca', emotion_l: 'love', emotion_r: 'happy', text: 'Sinabi na sayo—ikaw ang pinakamahusay. Proud na proud ako sa iyo.' },
+  { scene: 'school', speaker: 'Milca', char_l: 'matt', char_r: 'milca', emotion_l: 'love', emotion_r: 'love', text: 'Matt... walang mangyayari ito kung hindi mo ako pinalakas ng loob. Salamat.' },
+  { scene: 'gym', speaker: '', char_l: 'matt', char_r: 'milca', emotion_l: 'happy', emotion_r: 'happy', text: 'Magkasamang nilakad ang mga landas ng paaralan, ng gym, ng kanilang mga paboritong lugar...' },
+  { scene: 'jollibee', speaker: '', char_l: 'matt', char_r: 'milca', emotion_l: 'love', emotion_r: 'love', text: '...At palagi, palagi, bumabalik sa Jollibee—ang lugar ng kanilang pinakamaalab na mga kuwento.' },
+
+  // ============ CHAPTER 7: PAGSUBOK ============
+  { chapter: 7, chapterName: 'Unos Bago Ang Katahimikan', scene: 'school_night', speaker: '', text: 'Ngunit hindi laging maliwanag ang langit.' },
+  { scene: 'school_night', speaker: 'Matt', char_l: 'matt', char_r: 'milca', emotion_l: 'sad', emotion_r: 'sad', text: 'Milca... may sasabihin ang Nanay ko. Lilipat kami ng probinsya. Ililipat niya ako ng school.' },
+  { scene: 'school_night', speaker: 'Milca', char_l: 'matt', char_r: 'milca', emotion_l: 'sad', emotion_r: 'sad', text: '...Ha? Kailan?' },
+  { scene: 'school_night', speaker: 'Matt', char_l: 'matt', char_r: 'milca', emotion_l: 'sad', emotion_r: 'sad', text: 'Wala pang tiyak. Pero baka... bago pa mag-gradweyt.' },
+  { scene: 'school_night', speaker: 'Milca', char_l: 'matt', char_r: 'milca', emotion_l: 'neutral', emotion_r: 'cry', text: '...*Hindi nagsalita. Hindi makasalita.*' },
+  { scene: 'school_night', speaker: 'Matt', char_l: 'matt', char_r: 'milca', emotion_l: 'sad', emotion_r: 'cry', text: 'Milca... kahit lumayo ako, hindi mawawala ang pagmamahal ko sa iyo. Pangako ko.' },
+  { scene: 'school_night', speaker: 'Milca', char_l: 'matt', char_r: 'milca', emotion_l: 'sad', emotion_r: 'cry', text: 'Natatakot ako, Matt. Natatakot na makalimutan mo ako.' },
+  { scene: 'school_night', speaker: 'Matt', char_l: 'matt', char_r: 'milca', emotion_l: 'love', emotion_r: 'cry', text: 'Hindi kita malilimutan. Kailanman. Ikaw ang unang tao na nagturo sa akin ng totoong ngumiti.' },
+
+  // ============ CHAPTER 8: ANG PAGPILI ============
+  { chapter: 8, chapterName: 'Sa Sangandaan ng Tadhala', scene: 'school', speaker: '', text: 'Isa pang araw. Nagtatayo si Milca sa kalsada, naghihintay ng jeep...' },
+  { scene: 'school', speaker: '', text: 'Biglang narinig niya ang ingay ng malakas na makina. Isang malaking trak ang walang tigil na nagmamadali...' },
+  {
+    scene: 'road',
+    speaker: 'NARRATOR',
+    text: 'Ang tadhala ay palaging may sariling plano. At sa sandaling iyon, naandoon si Milca—nag-iisa—sa gitna ng daan...',
+    char_l: 'milca', emotion_l: 'sad',
+    choices: [
+      { text: '💔 Huwag tigilan si Matt — Pumunta sa kanya si Matt, pero... (Malungkot na Katapusan)', branch: 'sad' },
+      { text: '💛 Tumakbo si Matt para iligtas si Milca! (Masayang Katapusan)', branch: 'happy' }
+    ]
+  },
+
+  // ============ SAD ENDING ============
+  { branch: 'sad', chapter: 9, chapterName: 'Ang Huli Niyang Ngiti', scene: 'road', speaker: '', text: 'Hindi nakaabot si Matt sa oras. Napakabilis ng lahat. Isang kisap-mata...', action: 'rain' },
+  { branch: 'sad', scene: 'road', speaker: '', char_l: 'milca', emotion_l: 'cry', text: 'Ang trak. Ang ingay. At pagkatapos... katahimikan.' },
+  { branch: 'sad', scene: 'school_night', speaker: 'Matt', char_l: 'matt', emotion_l: 'cry', text: 'Milca... Milca! Saan ka na?! Bakit ka nandoon?! Bakit hindi mo ko hinintay?!' },
+  { branch: 'sad', scene: 'school_night', speaker: '', char_l: 'matt', emotion_l: 'cry', text: 'Umuulan. Nakatayo si Matt sa lugar na kanilang pinakamadalas puntahan. Ang libro ni Milca—ang "Letters to You"—ay nasa kamay niya.' },
+  { branch: 'sad', scene: 'house_night', speaker: 'Matt', char_l: 'matt', emotion_l: 'cry', text: 'Binuksan ko ang libro... May sulat ka pala. Para sa akin.' },
+  { branch: 'sad', scene: 'house_night', speaker: 'Milca (Sulat)', char_r: 'milca', emotion_r: 'love', text: '"Matt, kung mababasa mo ito... Salamat. Salamat sa lahat. Sa bawat ngiti, sa bawat salita. Naging kumpletong buhay ang akin dahil sa iyo."' },
+  { branch: 'sad', scene: 'house_night', speaker: 'Milca (Sulat)', char_r: 'milca', emotion_r: 'love', text: '"Mahal kita, Matt Cruz. At kahit saan ka pumunta, isusuot mo ang ngiti na itinuro ko sa iyo. Pangako mo?"' },
+  { branch: 'sad', scene: 'house_night', speaker: 'Matt', char_l: 'matt', emotion_l: 'cry', text: '...*Mga luha sa kanyang pisngi.* ...Pangako, Milca. Pangako.' },
+  { branch: 'sad', scene: 'school', speaker: '', char_l: 'matt', emotion_l: 'sad', text: 'Lumipas ang mga taon. Nanatili ang pangako. Nanatili ang alaala.' },
+  { branch: 'sad', scene: 'school', speaker: 'Matt', char_l: 'matt', emotion_l: 'sad', text: 'Tuwing papasok sa Jollibee, naalala niya si Milca. Tuwing nakikita ang isang babaeng may hawak na libro...' },
+  { branch: 'sad', scene: 'school', speaker: 'Matt', char_l: 'matt', emotion_l: 'love', text: '...Mahal kita, Milca. Lagi. Kahit hanggang sa kabilang buhay.' },
+  { branch: 'sad', ending: 'sad' },
+
+  // ============ HAPPY ENDING ============
+  { branch: 'happy', chapter: 9, chapterName: 'Isang Saglit na Nagbago ng Lahat', scene: 'road', speaker: '', text: 'Nakita ni Matt ang trak. Nakita niya si Milca. Walang pag-aalangan...' },
+  { branch: 'happy', scene: 'road', speaker: 'Matt', char_l: 'matt', char_r: 'milca', emotion_l: 'sad', emotion_r: 'surprised', text: 'MILCA! LUMAYO KA DOON!', action: 'flash' },
+  { branch: 'happy', scene: 'road', speaker: '', char_l: 'matt', char_r: 'milca', emotion_l: 'sad', emotion_r: 'surprised', text: 'Itinulak ni Matt si Milca palayo sa daan. Nahulog silang dalawa sa gilid ng kalsada, ngunit ligtas.' },
+  { branch: 'happy', scene: 'road', speaker: 'Milca', char_l: 'matt', char_r: 'milca', emotion_l: 'sad', emotion_r: 'cry', text: 'Matt! Matt, okay ka ba?! Sagot mo ako!' },
+  { branch: 'happy', scene: 'road', speaker: 'Matt', char_l: 'matt', char_r: 'milca', emotion_l: 'happy', emotion_r: 'cry', text: '...Haha. Masakit nga... Pero okay lang. Buhay ka. Okay na lahat.' },
+  { branch: 'happy', scene: 'road', speaker: 'Milca', char_l: 'matt', char_r: 'milca', emotion_l: 'happy', emotion_r: 'cry', text: 'Umiyak nang umiyak si Milca. Tanga! Baka nasagasaan ka rin! Bakit mo ginawa iyon?!' },
+  { branch: 'happy', scene: 'road', speaker: 'Matt', char_l: 'matt', char_r: 'milca', emotion_l: 'love', emotion_r: 'cry', text: 'Kasi... hindi ko kayang mawala ka. Hindi ko kaya, Milca.' },
+  { branch: 'happy', scene: 'gym_inside', speaker: '', char_l: 'matt', char_r: 'milca', emotion_l: 'happy', emotion_r: 'happy', text: 'Mga araw pagkatapos. Nagpagaling si Matt sa ospital. Si Milca—hindi siya umalis sa tabi niya.' },
+  { branch: 'happy', scene: 'gym_inside', speaker: 'Milca', char_l: 'matt', char_r: 'milca', emotion_l: 'happy', emotion_r: 'love', text: 'Hindi ka talaga pupunta ng ibang school, Matt. Ipinalaban ko iyon sa iyong Nanay.' },
+  { branch: 'happy', scene: 'gym_inside', speaker: 'Matt', char_l: 'matt', char_r: 'milca', emotion_l: 'surprised', emotion_r: 'love', text: 'Hah?! Nausap mo pa ang Nanay ko?' },
+  { branch: 'happy', scene: 'gym_inside', speaker: 'Milca', char_l: 'matt', char_r: 'milca', emotion_l: 'happy', emotion_r: 'happy', text: 'Oo! Sinabi ko, kung lilipat siya, susundan kita kahit saan. Medyo natakot siya.' },
+  { branch: 'happy', scene: 'gym_inside', speaker: 'Matt', char_l: 'matt', char_r: 'milca', emotion_l: 'love', emotion_r: 'happy', text: '...Natatawa na ako nang sobra. Milca Santos, ikaw talaga.' },
+  { branch: 'happy', scene: 'jollibee_inside', speaker: '', char_l: 'matt', char_r: 'milca', emotion_l: 'love', emotion_r: 'love', text: 'Lumipas ang ilang taon. Nag-gradweyt sila. Nag-kolehiyo. Nagtatrabaho. Ngunit lagi at lagi...' },
+  { branch: 'happy', scene: 'jollibee_inside', speaker: '', char_l: 'matt', char_r: 'milca', emotion_l: 'love', emotion_r: 'love', text: '...Bumabalik sila sa Jollibee. Sa kanilang mesa. Sa kanilang pagkain. Sa kanilang kuwento.' },
+  { branch: 'happy', scene: 'jollibee_inside', speaker: 'Matt', char_l: 'matt', char_r: 'milca', emotion_l: 'love', emotion_r: 'love', text: 'Milca... may tanong ako sa iyo. Matagal ko nang gustong itanong ito.' },
+  { branch: 'happy', scene: 'jollibee_inside', speaker: 'Milca', char_l: 'matt', char_r: 'milca', emotion_l: 'happy', emotion_r: 'surprised', text: '...Matt? Ano ito? Bakit ka ganyan ka-seryoso?' },
+  { branch: 'happy', scene: 'jollibee_inside', speaker: 'Matt', char_l: 'matt', char_r: 'milca', emotion_l: 'love', emotion_r: 'surprised', text: 'Lumuhod si Matt. Sa loob ng Jollibee, sa harap ng lahat. May hawak na maliit na kahon.' },
+  { branch: 'happy', scene: 'jollibee_inside', speaker: 'Matt', char_l: 'matt', char_r: 'milca', emotion_l: 'love', emotion_r: 'love', text: 'Milca Santos... ikaw ang unang tao na nagturo sa akin ng totoong ngumiti. Gustong-gusto kitang samahan habambuhay. Pakakasalan mo ba ako?' },
+  { branch: 'happy', scene: 'jollibee_inside', speaker: 'Milca', char_l: 'matt', char_r: 'milca', emotion_l: 'love', emotion_r: 'love', text: '...', action: 'hearts' },
+  { branch: 'happy', scene: 'jollibee_inside', speaker: 'Milca', char_l: 'matt', char_r: 'milca', emotion_l: 'love', emotion_r: 'love', text: 'Oo. OO! Matt Cruz—isang libong beses na OO!' },
+  { branch: 'happy', scene: 'jollibee_inside', speaker: '', text: 'Sumabog ang palakpakan ng mga tao sa paligid nila. Naiyak ang kasera. Nagtawanan ang mga bata.', action: 'confetti' },
+
+  // ============ WEDDING ============
+  { branch: 'happy', chapter: 10, chapterName: 'Ang Pinakamagandang Pagtatapos', scene: 'beach', speaker: '', text: 'Sa tabi ng dagat, habang lumulubog ang araw...', action: 'confetti' },
+  { branch: 'happy', scene: 'beach', speaker: 'Pari', char_l: 'matt', char_r: 'milca', emotion_l: 'wedding', emotion_r: 'wedding', text: 'Ikaw, Matthew Cruz, ay tumatanggap ba kay Milca Santos bilang iyong mahal na asawa?' },
+  { branch: 'happy', scene: 'beach', speaker: 'Matt', char_l: 'matt', char_r: 'milca', emotion_l: 'wedding', emotion_r: 'wedding', text: 'Tinatanggap ko. Ngumiti ng buong puso.' },
+  { branch: 'happy', scene: 'beach', speaker: 'Pari', char_l: 'matt', char_r: 'milca', emotion_l: 'wedding', emotion_r: 'wedding', text: 'Ikaw, Milca Santos, ay tumatanggap ba kay Matthew Cruz bilang iyong mahal na asawa?' },
+  { branch: 'happy', scene: 'beach', speaker: 'Milca', char_l: 'matt', char_r: 'milca', emotion_l: 'wedding', emotion_r: 'wedding', text: 'Tinatanggap ko. Lumuha sa kagalakan.' },
+  { branch: 'happy', scene: 'beach', speaker: '', char_l: 'matt', char_r: 'milca', emotion_l: 'wedding', emotion_r: 'wedding', text: 'Ang araw ay lumulubog sa likod nila—pula, ginto, at lila. Katulad ng unang pagkakataon na nagkita sila, magkasamang nakatayo ngayon sila sa simula ng kanilang pinakadakilang kabanata.', action: 'confetti' },
+  { branch: 'happy', scene: 'beach', speaker: 'Matt', char_l: 'matt', char_r: 'milca', emotion_l: 'wedding', emotion_r: 'wedding', text: 'Ikaw pa rin, Milca. Ikaw pa rin ang dahilan ng aking ngiti.' },
+  { branch: 'happy', scene: 'beach', speaker: 'Milca', char_l: 'matt', char_r: 'milca', emotion_l: 'wedding', emotion_r: 'wedding', text: 'At ikaw pa rin, Matt. Ikaw pa rin ang nagbibigay ng lakas sa aking puso.' },
+  { branch: 'happy', ending: 'happy' }
+];
+
+/* ============================================================
+   ENGINE
+   ============================================================ */
+let scriptIndex = 0;
+let currentBranch = null;
+let gameStarted = false;
+
+function getFilteredScript() {
+  return script.filter(s => !s.branch || s.branch === currentBranch || !currentBranch);
+}
+
+function getCurrentEntry() {
+  const filtered = getFilteredScript();
+  return filtered[scriptIndex] || null;
+}
+
+function init() {
+  dialogueEl = document.getElementById('dialogueText');
+  speakerEl = document.getElementById('speakerName');
+  choicesEl = document.getElementById('choicesContainer');
+  charL = document.getElementById('charLeft');
+  charR = document.getElementById('charRight');
+
+  // Stars on title
+  const starsEl = document.getElementById('titleStars');
+  for(let i=0;i<60;i++){
+    const star = document.createElement('div');
+    star.className='star';
+    const size = Math.random()<0.3 ? 4 : 2;
+    star.style.cssText=`width:${size}px;height:${size}px;top:${Math.random()*65}%;left:${Math.random()*100}%;animation-delay:${Math.random()*3}s;animation-duration:${1+Math.random()*2}s`;
+    starsEl.appendChild(star);
+  }
+
+  // Draw title canvas hearts/pixel art
+  drawTitleArt();
+
+  document.getElementById('btnStart').addEventListener('click', startGame);
+  document.getElementById('dialogueBox').addEventListener('click', advanceDialogue);
+  document.getElementById('btnAutoPlay').addEventListener('click', toggleAuto);
+  document.getElementById('btnSkip').addEventListener('click', skipDialogue);
+  document.getElementById('btnReplay').addEventListener('click', ()=>{location.reload();});
+  document.addEventListener('keydown', e=>{
+    if(e.code==='Space'||e.code==='Enter') advanceDialogue();
+  });
+
+  // Touch swipe support
+  let touchStartX=0;
+  document.addEventListener('touchstart',e=>{touchStartX=e.touches[0].clientX;},{passive:true});
+  document.addEventListener('touchend',e=>{
+    const dx=e.changedTouches[0].clientX-touchStartX;
+    if(Math.abs(dx)<30) advanceDialogue();
+  },{passive:true});
+}
+
+function drawTitleArt() {
+  // Draw pixel Matt & Milca silhouette on title
+  const tc = document.createElement('canvas');
+  tc.width=180; tc.height=100;
+  tc.style.cssText='image-rendering:pixelated;width:180px;height:100px;';
+  const c=tc.getContext('2d');
+  c.imageSmoothingEnabled=false;
+  // Matt silhouette
+  c.fillStyle='rgba(40,80,160,0.😎';
+  c.fillRect(30,20,24,60); c.fillRect(24,15,36,24); // body+head
+  c.fillRect(16,22,10,36); c.fillRect(54,22,10,36); // arms
+  c.fillRect(32,78,8,22); c.fillRect(46,78,8,22); // legs
+  // Milca silhouette
+  c.fillStyle='rgba(200,60,100,0.😎';
+  c.fillRect(126,20,24,60); c.fillRect(120,15,36,24);
+  c.fillRect(112,22,10,36); c.fillRect(150,22,10,36);
+  c.fillRect(128,78,8,22); c.fillRect(142,78,8,22);
+  // Hair
+  c.fillStyle='rgba(20,10,5,0.9)';
+  c.fillRect(118,12,44,14); c.fillRect(112,15,8,30); c.fillRect(150,15,8,30);
+  // Heart between them
+  c.fillStyle='#E8323C';
+  c.fillRect(84,36,12,12); c.fillRect(84+16,36,12,12);
+  c.fillRect(80,44,32,12); c.fillRect(84,54,24,8); c.fillRect(88,60,16,6); c.fillRect(90,64,12,4);
+  document.getElementById('titleArtCanvas').appendChild(tc);
+}
+
+function startGame() {
+  document.getElementById('titleScreen').style.display='none';
+  document.getElementById('gameScreen').style.display='flex';
+  gameStarted=true;
+  scriptIndex=0;
+  currentBranch=null;
+  totalScenes = script.length;
+  processEntry();
+}
+
+function processEntry() {
+  const filtered = getFilteredScript();
+  if(scriptIndex >= filtered.length) return;
+  const entry = filtered[scriptIndex];
+
+  if(!entry) return;
+
+  // Check for ending
+  if(entry.ending){
+    showEnding(entry.ending);
+    return;
+  }
+
+  // Chapter title
+  if(entry.chapter){
+    showChapterTitle(entry.chapter, entry.chapterName, ()=>renderEntry(entry));
+  } else {
+    renderEntry(entry);
+  }
+
+  // Update progress
+  scenesPlayed++;
+  const pct = Math.round((scenesPlayed/totalScenes)*100);
+  document.getElementById('progressFill').style.width=Math.min(pct,100)+'%';
+}
+
+function renderEntry(entry) {
+  // Scene change
+  if(entry.scene){
+    fadeToScene(entry.scene, ()=>{
+      renderEntryContent(entry);
+    });
+  } else {
+    renderEntryContent(entry);
+  }
+}
+
+function renderEntryContent(entry) {
+  // Characters
+  updateCharacter(charL, entry.char_l, entry.emotion_l);
+  updateCharacter(charR, entry.char_r, entry.emotion_r);
+
+  // Choices
+  if(entry.choices){
+    showChoices(entry.choices);
+    hideSpeaker();
+    typeText(entry.text, ()=>{
+      choicesEl.style.display='flex';
+    });
+    return;
+  }
+
+  choicesEl.style.display='none';
+
+  // Speaker name
+  if(entry.speaker){
+    speakerEl.textContent=entry.speaker;
+    // Color code
+    if(entry.speaker.includes('Matt')) speakerEl.style.color='#80AAFF';
+    else if(entry.speaker.includes('Milca')) speakerEl.style.color='#FFB8D0';
+    else if(entry.speaker==='NARRATOR') speakerEl.style.color='#F5C842';
+    else speakerEl.style.color='#F5C842';
+  } else {
+    speakerEl.textContent='';
+  }
+
+  // Actions
+  if(entry.action==='rain') startRain();
+  if(entry.action==='flash') doFlash();
+  if(entry.action==='hearts') spawnParticles('💕');
+  if(entry.action==='confetti') startConfetti();
+
+  typeText(entry.text);
+}
+
+function updateCharacter(canvasEl, charType, emotion) {
+  if(!charType){
+    canvasEl.classList.add('hidden');
+    return;
+  }
+  canvasEl.classList.remove('hidden');
+  drawCharacter(canvasEl, charType, emotion||'neutral');
+  if(emotion==='cry'||emotion==='sad'){
+    canvasEl.classList.add('shake');
+    setTimeout(()=>canvasEl.classList.remove('shake'),600);
+  }
+}
+
+function hideSpeaker(){ speakerEl.textContent=''; }
+
+function typeText(text, cb){
+  if(!text){if(cb)cb();return;}
+  isTyping=true;
+  fullText=text;
+  dialogueEl.textContent='';
+  if(typingTimeout) clearTimeout(typingTimeout);
+  let i=0;
+  const speed=30;
+  function type(){
+    if(i>=text.length){
+      isTyping=false;
+      if(cb) cb();
+      if(autoPlay) scheduleAuto();
+      return;
+    }
+    dialogueEl.textContent+=text[i];
+    i++;
+    typingTimeout=setTimeout(type, speed);
+  }
+  type();
+}
+
+function advanceDialogue(){
+  if(choicesEl.style.display==='flex') return;
+  if(isTyping){
+    clearTimeout(typingTimeout);
+    dialogueEl.textContent=fullText;
+    isTyping=false;
+    if(autoPlay) scheduleAuto();
+    return;
+  }
+  if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}
+  nextEntry();
+}
+
+function nextEntry(){
+  const filtered=getFilteredScript();
+  scriptIndex++;
+  if(scriptIndex>=filtered.length) return;
+  processEntry();
+}
+
+function showChoices(choices){
+  choicesEl.innerHTML='';
+  choicesEl.style.display='none';
+  choices.forEach(ch=>{
+    const btn=document.createElement('button');
+    btn.className='choice-btn';
+    btn.textContent=ch.text;
+    btn.addEventListener('click',()=>{
+      currentBranch=ch.branch;
+      choicesEl.style.display='none';
+      choicesEl.innerHTML='';
+      scriptIndex++;
+      processEntry();
+    });
+    choicesEl.appendChild(btn);
+  });
+}
+
+function showChapterTitle(num, name, cb){
+  const el=document.getElementById('chapterTitle');
+  document.getElementById('chapterLabel').textContent='KABANATA '+num;
+  document.getElementById('chapterName').textContent=name;
+  el.classList.add('show');
+  setTimeout(()=>{
+    el.classList.remove('show');
+    setTimeout(cb,500);
+  },2200);
+}
+
+function fadeToScene(sceneName, cb){
+  const ov=document.getElementById('fadeOverlay');
+  ov.classList.add('fade-in');
+  setTimeout(()=>{
+    drawScene(sceneName);
+    setTimeout(()=>{
+      ov.classList.remove('fade-in');
+      if(cb) cb();
+    },300);
+  },300);
+}
+
+function toggleAuto(){
+  autoPlay=!autoPlay;
+  const btn=document.getElementById('btnAutoPlay');
+  btn.textContent=autoPlay?'⏸ AUTO':'⏩ AUTO';
+  btn.style.background=autoPlay?'rgba(245,200,66,0.4)':'rgba(245,200,66,0.15)';
+  if(autoPlay&&!isTyping) scheduleAuto();
+}
+
+function scheduleAuto(){
+  if(autoTimer) clearTimeout(autoTimer);
+  autoTimer=setTimeout(()=>{
+    if(autoPlay&&!isTyping) nextEntry();
+  },2500);
+}
+
+function skipDialogue(){
+  if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}
+  if(isTyping){ clearTimeout(typingTimeout); dialogueEl.textContent=fullText; isTyping=false; return; }
+  nextEntry();
+}
+
+/* ---- EFFECTS ---- */
+let rainEl=null;
+function startRain(){
+  if(rainEl) return;
+  rainEl=document.createElement('div');
+  rainEl.className='rain-container';
+  rainEl.id='rainLayer';
+  for(let i=0;i<50;i++){
+    const drop=document.createElement('div');
+    drop.className='raindrop';
+    drop.style.cssText=`left:${Math.random()*100}%;height:${10+Math.random()*20}px;animation-duration:${0.5+Math.random()*0.8}s;animation-delay:${Math.random()*1}s`;
+    rainEl.appendChild(drop);
+  }
+  document.getElementById('gameScreen').appendChild(rainEl);
+}
+
+function doFlash(){
+  const f=document.getElementById('screenFlash');
+  f.style.opacity='0.8';
+  setTimeout(()=>f.style.opacity='0',200);
+}
+
+function spawnParticles(emoji,count=8){
+  const p=document.getElementById('particles');
+  for(let i=0;i<count;i++){
+    const el=document.createElement('div');
+    el.className='particle';
+    el.textContent=emoji;
+    el.style.cssText=`left:${10+Math.random()*80}%;top:${60+Math.random()*20}%;animation-delay:${Math.random()*0.5}s`;
+    p.appendChild(el);
+    setTimeout(()=>el.remove(),2500);
+  }
+}
+
+let confettiTimer=null;
+function startConfetti(){
+  spawnParticles('🌸',5);spawnParticles('✨',5);spawnParticles('💛',3);
+  let count=0;
+  confettiTimer=setInterval(()=>{
+    spawnParticles(['🌸','✨','💫','💛','🤍'][count%5],3);
+    count++;
+    if(count>8){ clearInterval(confettiTimer); }
+  },400);
+}
+
+function showEnding(type){
+  const el=document.getElementById('endingScreen');
+  el.className='';
+  el.style.display='flex';
+  el.classList.add(type);
+  document.getElementById('mobileControls').style.display='none';
+  document.getElementById('progressBar').style.display='none';
+  document.getElementById('locationTag').style.display='none';
+  document.getElementById('timeTag').style.display='none';
+
+  if(type==='sad'){
+    document.getElementById('endingTitle').textContent='💔 MALUNGKOT NA KATAPUSAN 💔';
+    document.getElementById('endingMessage').innerHTML=
+      `"Para sa lahat ng taong mahal natin, ngunit hindi natin nasabihan sa tamang oras..."<br><br>`+
+      `Si Matt ay nabuhay na may isang pangako. Isang ngiti na hindi niya malilimutan.<br><br>`+
+      `At sa bawat araw, sa bawat Chicken Joy sa Jollibee, sa bawat aklat na may hawak ang isang babae—<br><br>`+
+      <em>nandoon pa rin si Milca, sa kanyang puso.</em>;
+    startRain();
+  } else {
+    document.getElementById('endingTitle').textContent='💛 MASAYANG KATAPUSAN 💛';
+    document.getElementById('endingMessage').innerHTML=
+      `"Sa tabi ng dagat, habang lumulubog ang araw..."<br><br>`+
+      `Si Matt at Milca — mula sa isang nahulog na libro, hanggang sa isang pangako sa harap ng Diyos.<br><br>`+
+      `Nagsimula sa simpleng ngiti, sa simpleng Chicken Joy, sa simpleng "okay lang."<br><br>`+
+      `<em>At natapos... sa pinakamagandang pagmamahal.</em><br><br>`+
+     🌅 Matt ♥ Milca — Magpakailanman 🌅`;
+    startConfetti();
+    setTimeout(()=>startConfetti(),2000);
+  }
+}
+
+/* ---- tiny person ---- */
+function drawTinyPerson(ctx,x,y,shirtColor,skinColor){
+  ctx.fillStyle=skinColor; ctx.fillRect(x,y-24,8,8);
+  ctx.fillStyle=shirtColor; ctx.fillRect(x-1,y-16,10,16);
+  ctx.fillStyle='#2A1A0A'; ctx.fillRect(x,y,4,10); ctx.fillRect(x+4,y,4,10);
+  ctx.fillStyle=skinColor; ctx.fillRect(x-3,y-14,4,10); ctx.fillRect(x+9,y-14,4,10);
+}
+
+/* ---- START ---- */
+window.addEventListener('load', ()=>{
+  drawScene('school');
+  init();
+});
+</script>
 </body>
 </html>
