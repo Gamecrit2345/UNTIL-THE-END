@@ -3,202 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Kwento ni Matt at Milca</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Courier New', monospace;
-            background: #000;
-            color: #fff;
-            overflow: hidden;
-            touch-action: manipulation;
-        }
-        #game-container {
-            position: relative;
-            width: 100vw;
-            height: 100vh;
-            max-width: 1200px;
-            margin: 0 auto;
-            border: 4px solid #444;
-            background: #111;
-            box-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
-        }
-        #background {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background-size: cover;
-            background-position: center;
-            image-rendering: pixelated;
-            transition: background-image 1.5s ease;
-            filter: contrast(1.1) saturate(1.2);
-        }
-        #character {
-            position: absolute;
-            bottom: 15%;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 38%;
-            max-height: 65%;
-            image-rendering: pixelated;
-            image-rendering: crisp-edges;
-            transition: all 0.8s ease;
-        }
-        #dialogue-box {
-            position: absolute;
-            bottom: 5%;
-            left: 5%;
-            right: 5%;
-            background: rgba(0,0,0,0.88);
-            border: 4px solid #ffd700;
-            padding: 25px;
-            border-radius: 12px;
-            font-size: 1.25em;
-            line-height: 1.5;
-            max-height: 38%;
-            overflow-y: auto;
-            box-shadow: 0 0 15px rgba(255,215,0,0.4);
-        }
-        #choices {
-            position: absolute;
-            bottom: 45%;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            z-index: 10;
-        }
-        button {
-            background: #222;
-            color: #ffd700;
-            border: 3px solid #ffd700;
-            padding: 18px 35px;
-            font-size: 1.15em;
-            cursor: pointer;
-            border-radius: 8px;
-            min-width: 320px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-        }
-        button:hover, button:active {
-            background: #ffd700;
-            color: #111;
-            transform: scale(1.05);
-        }
-        #title-screen {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(to bottom, #001122, #330000);
-            z-index: 20;
-            text-align: center;
-        }
-        h1 {
-            font-size: 3.2em;
-            color: #ffd700;
-            text-shadow: 0 0 15px #ff0, 0 0 25px #f80;
-            margin-bottom: 10px;
-        }
-        .pixel { image-rendering: pixelated; }
-    </style>
+    <title>UNTIL THE END</title>
+    <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
     <div id="game-container">
         <div id="background"></div>
-        <img id="character" class="pixel" src="" alt="Character">
+        <img id="character" class="pixel" src="" alt="Pixel Character">
         <div id="dialogue-box"></div>
         <div id="choices"></div>
 
         <div id="title-screen">
-            <h1>Kwento ni Matt at Milca</h1>
-            <p style="color:#ddd; font-size:1.6em; margin:10px;">Pixelated Love Story • Hanggang Wakas</p>
-            <button onclick="startGame()" style="margin-top:40px; padding:25px 50px; font-size:1.6em;">Simulan ang Kwento</button>
-            <p style="margin-top:30px; color:#888; font-size:0.9em;">Touch-friendly • 2 Endings • Serious Story</p>
+            <h1>UNTIL THE END</h1>
+            <p style="color:#ccc; font-size:1.5em;">Pixelated Love Story</p>
+            <button onclick="startGame()" style="margin-top:50px; padding:25px 60px; font-size:1.7em;">Simulan ang Kwento</button>
         </div>
     </div>
-
-    <script>
-        let currentScene = 0;
-
-        const scenes = [
-            {id:0, bg:'https://picsum.photos/id/1015/1920/1080', char:'', dialogue:"Sa isang kilalang paaralan sa Maynila, nabubuhay si Matt Rivera, isang seryosong binata na may malalim na pag-ibig sa edukasyon at sining.", speaker:"Narrator", choices:[{text:"Magpatuloy", next:1}]},
-            {id:1, bg:'https://picsum.photos/id/1015/1920/1080', char:'https://via.placeholder.com/500x700/FF69B4/111?text=Milca', dialogue:"Sa hallway, nabangga niya si Milca Santos — isang maganda, matalino, at mabait na dalaga. 'Pasensya na po, hindi ko sinasadya,' ani Milca.", speaker:"Milca", choices:[{text:"Tulungan siya", next:2}]},
-            {id:2, bg:'https://picsum.photos/id/866/1920/1080', char:'', dialogue:"Mula noon, naging malapit ang kanilang pagkakaibigan. Nag-aaral sila nang magkasama at nagbabahagi ng mga pangarap.", speaker:"Narrator", choices:[{text:"Magpatuloy", next:3}]},
-            {id:3, bg:'https://picsum.photos/id/1016/1920/1080', char:'', dialogue:"Sa gym, nag-ehersisyo sila nang magkasama. 'Matt, ikaw ang nagbibigay lakas sa akin araw-araw,' sabi ni Milca.", speaker:"Milca", choices:[{text:"Magpatuloy", next:4}]},
-            {id:4, bg:'https://picsum.photos/id/1015/1920/1080', char:'', dialogue:"Sa loob ng maraming buwan, lumalim ang ugnayan nila sa paaralan, bahay, at gym. Sinusuportahan nila ang isa't isa sa lahat ng hamon.", speaker:"Narrator", choices:[{text:"Magpatuloy", next:5}]},
-            {id:5, bg:'https://picsum.photos/id/870/1920/1080', char:'https://via.placeholder.com/500x700/FF1493/FFF?text=Milca', dialogue:"Sa kanilang paboritong Jollibee, nag-date sila. 'Milca, ikaw ang pinakamahalaga sa buhay ko,' sabi ni Matt nang buong puso.", speaker:"Matt", choices:[{text:"Magpatuloy", next:10}]},
-            {id:6, bg:'https://picsum.photos/id/1015/1920/1080', char:'', dialogue:"Naghanda sila ng proyekto sa paaralan. Ang kanilang teamwork ay nagdulot ng tagumpay at lalong nagpalakas sa kanilang samahan.", speaker:"Narrator", choices:[{text:"Magpatuloy", next:7}]},
-            {id:7, bg:'https://picsum.photos/id/866/1920/1080', char:'', dialogue:"Sa bahay, binisita ni Milca si Matt. Nagluto sila at nagkwentuhan tungkol sa kanilang mga alaala.", speaker:"Milca", choices:[{text:"Magpatuloy", next:8}]},
-            {id:8, bg:'https://picsum.photos/id/1016/1920/1080', char:'', dialogue:"Sa gym ulit, 'Kasama mo, parang walang imposible,' ani Matt habang nagpapawis.", speaker:"Matt", choices:[{text:"Magpatuloy", next:5}]},
-            {id:10, bg:'https://picsum.photos/id/870/1920/1080', char:'', dialogue:"Habang lumalalim ang pagmamahalan, dalawang landas ang bukas. Ano ang pipiliin mo?", speaker:"Narrator", choices:[
-                {text:"Ituloy ang pag-ibig at planuhin ang kasal (Happy Ending)", next:20},
-                {text:"Mag-antala dahil sa takot (Sad Path)", next:15}
-            ]},
-            {id:15, bg:'https://picsum.photos/id/201/1920/1080', char:'https://via.placeholder.com/500x700/8B0000/FFF?text=Milca', dialogue:"Pagkatapos ng date sa Jollibee, habang naglalakad pauwi si Milca, biglang lumitaw ang isang truck at siya ay nasagasaan. Si Matt ay dumating na puno ng walang katapusang pighati.", speaker:"Narrator", choices:[{text:"Sad Ending", ending:'sad'}]},
-            {id:20, bg:'https://picsum.photos/id/1018/1920/1080', char:'', dialogue:"Pagkatapos ng lahat ng sandali sa paaralan, bahay, gym, at Jollibee, nag-propose si Matt. Sa tabi ng dagat, sa ilalim ng napakagandang sunset na may mainit na orange at golden lighting, ikinasal sila. Isang walang-hanggang happy ending.", speaker:"Narrator", choices:[{text:"Happy Ending", ending:'happy'}]}
-        ];
-
-        function updateScene() {
-            const scene = scenes.find(s => s.id === currentScene);
-            if (!scene) return;
-
-            document.getElementById('background').style.backgroundImage = `url('${scene.bg}')`;
-            const charEl = document.getElementById('character');
-            charEl.src = scene.char || '';
-            charEl.style.display = scene.char ? 'block' : 'none';
-
-            document.getElementById('dialogue-box').innerHTML = `<strong>${scene.speaker}:</strong><br>${scene.dialogue}`;
-
-            const choicesDiv = document.getElementById('choices');
-            choicesDiv.innerHTML = '';
-            if (scene.choices) {
-                scene.choices.forEach(c => {
-                    const btn = document.createElement('button');
-                    btn.textContent = c.text;
-                    btn.onclick = () => {
-                        if (c.next !== undefined) {
-                            currentScene = c.next;
-                            updateScene();
-                        } else if (c.ending) {
-                            showEnding(c.ending);
-                        }
-                    };
-                    choicesDiv.appendChild(btn);
-                });
-            }
-        }
-
-        function startGame() {
-            document.getElementById('title-screen').style.display = 'none';
-            currentScene = 0;
-            updateScene();
-        }
-
-        function showEnding(type) {
-            const container = document.getElementById('game-container');
-            const endDiv = document.createElement('div');
-            endDiv.style.cssText = `position:absolute; top:0; left:0; width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:30; color:#fff; text-align:center; ${type==='sad' ? 'background:rgba(20,0,0,0.95);' : 'background:linear-gradient(to bottom, #ff8800, #ff2200);'}`;
-            
-            endDiv.innerHTML = type === 'sad' 
-                ? `<h1 style="color:#ff4444;">Sad Ending</h1><p>Namatay si Milca sa aksidente. Si Matt ay nanatiling puno ng pagsisisi at kalungkutan magpakailanman.</p>`
-                : `<h1 style="color:#ff0; text-shadow:0 0 20px #ff0;">Happy Ending</h1><p>Ikakasal sina Matt at Milca sa tabi ng dagat sa ilalim ng magandang sunset. Isang perpektong simula ng kanilang buhay na magkasama.</p><p style="font-size:2em;">Salamat sa paglalaro! ❤️</p>`;
-            
-            endDiv.innerHTML += `<button onclick="location.reload()" style="margin-top:40px; padding:20px 40px; font-size:1.4em;">Muling Simulan ang Kwento</button>`;
-            container.appendChild(endDiv);
-        }
-
-        // Keyboard support for PC (arrow/right or space to progress if no choices)
-        document.addEventListener('keydown', e => {
-            if (e.key === ' ' || e.key === 'ArrowRight') {
-                const choices = document.querySelectorAll('#choices button');
-                if (choices.length === 1) choices[0].click();
-            }
-        });
-    </script>
+    <script src="js/game.js"></script>
 </body>
 </html>
