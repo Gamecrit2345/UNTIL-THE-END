@@ -2,65 +2,51 @@ const player = new Player(50, 50);
 const camera = new Camera();
 
 let scene = "school";
+let route = "neutral"; // good / bad / neutral
 
-// SCHOOL MAP
-const schoolMap = {
-  tileSize: 16,
-  width: 20,
-  height: 12,
-  tiles: []
+// JOLLIBEE DATE AREA
+const jollibee = {
+  x: 140,
+  y: 90,
+  size: 10,
+  active: false
 };
 
-for (let y = 0; y < schoolMap.height; y++) {
-  for (let x = 0; x < schoolMap.width; x++) {
-    if (x === 0 || y === 0 || x === schoolMap.width - 1 || y === schoolMap.height - 1) {
-      schoolMap.tiles.push(1);
-    } else {
-      schoolMap.tiles.push(0);
-    }
-  }
-};
+function startJollibeeDate() {
+  SceneManager.set("jollibee");
 
-// Milca
-const milca = { x: 120, y: 80, size: 8, met: false };
+  setSunset(1);
 
-// interaction trigger
-function checkMilca() {
-  const dx = player.x - milca.x;
-  const dy = player.y - milca.y;
+  startDialogue([
+    "Milca: Ang ganda ng lugar no?",
+    "Matt: Oo... mas maganda pag kasama ka."
+  ]);
+}
+
+// TRIGGER JOLLIBEE
+function checkJollibee() {
+  const dx = player.x - jollibee.x;
+  const dy = player.y - jollibee.y;
   const dist = Math.sqrt(dx * dx + dy * dy);
 
-  if (dist < 12 && !milca.met) {
-    milca.met = true;
-
-    startDialogue(
-      [
-        "Milca: Uy, bago ka dito noh?",
-        "Matt: Oo... kakalipat ko lang.",
-        "Milca: Ako si Milca."
-      ],
-      {
-        onChoice: (c) => {
-          if (c === 1) Relationship.add(2);
-          if (c === 2) Relationship.add(-1);
-
-          Save.data.milcaMet = true;
-        }
-      }
-    );
+  if (dist < 12 && Relationship.affection >= 5) {
+    startJollibeeDate();
   }
 }
 
-function tileAt(map, x, y) {
-  const tx = Math.floor(x / map.tileSize);
-  const ty = Math.floor(y / map.tileSize);
+// SIMPLE MAP SWITCH
+function updateScene() {
+  if (SceneManager.current === "school") {
+    schoolUpdate();
+  }
 
-  if (tx < 0 || ty < 0 || tx >= map.width || ty >= map.height) return 1;
-
-  return map.tiles[ty * map.width + tx];
+  if (SceneManager.current === "jollibee") {
+    jollibeeUpdate();
+  }
 }
 
-function update() {
+// SCHOOL LOGIC
+function schoolUpdate() {
   let map = schoolMap;
 
   let nextX = player.x;
@@ -77,47 +63,58 @@ function update() {
   camera.follow(player);
 
   checkMilca();
+  checkJollibee();
 
   updateDialogue();
 }
 
-function drawMap() {
-  let map = schoolMap;
-
-  for (let y = 0; y < map.height; y++) {
-    for (let x = 0; x < map.width; x++) {
-      ctx.fillStyle = (x === 0 || y === 0 || x === map.width-1 || y === map.height-1)
-        ? "#444"
-        : "#2b2b2b";
-
-      ctx.fillRect(
-        x * map.tileSize - camera.x,
-        y * map.tileSize - camera.y,
-        map.tileSize,
-        map.tileSize
-      );
-    }
+// JOLLIBEE LOGIC
+function jollibeeUpdate() {
+  if (keys["e"]) {
+    Relationship.add(1);
+    keys["e"] = false;
   }
+
+  updateDialogue();
+}
+
+// DRAW
+function drawSchool() {
+  drawMap();
+
+  ctx.fillStyle = "pink";
+  ctx.fillRect(120 - camera.x, 80 - camera.y, 8, 8);
+
+  ctx.fillStyle = "yellow";
+  ctx.fillRect(player.x - camera.x, player.y - camera.y, 8, 8);
+}
+
+function drawJollibee() {
+  ctx.fillStyle = "#1f1f1f";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  ctx.fillStyle = "orange";
+  ctx.fillRect(100, 60, 60, 40);
+
+  ctx.fillStyle = "pink";
+  ctx.fillText("Milca is smiling...", 90, 120);
+
+  ctx.fillStyle = "yellow";
+  ctx.fillRect(player.x, player.y, 8, 8);
 }
 
 function draw() {
   clearScreen();
 
-  drawMap();
-
-  // Milca
-  ctx.fillStyle = "pink";
-  ctx.fillRect(milca.x - camera.x, milca.y - camera.y, milca.size, milca.size);
-
-  // player
-  ctx.fillStyle = "yellow";
-  ctx.fillRect(player.x - camera.x, player.y - camera.y, player.size, player.size);
+  if (SceneManager.current === "school") drawSchool();
+  if (SceneManager.current === "jollibee") drawJollibee();
 
   drawDialogue();
+  drawLighting(ctx);
 }
 
 function loop() {
-  update();
+  updateScene();
   draw();
   requestAnimationFrame(loop);
 }
