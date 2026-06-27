@@ -2,51 +2,55 @@ const player = new Player(50, 50);
 const camera = new Camera();
 
 let scene = "school";
-let route = "neutral"; // good / bad / neutral
+let endingTriggered = false;
 
-// JOLLIBEE DATE AREA
-const jollibee = {
-  x: 140,
+// TRUCK EVENT OBJECT
+const truckEvent = {
+  x: 200,
   y: 90,
-  size: 10,
-  active: false
+  active: false,
+  triggered: false
 };
 
-function startJollibeeDate() {
-  SceneManager.set("jollibee");
+function triggerSadEnding() {
+  if (endingTriggered) return;
 
-  setSunset(1);
+  endingTriggered = true;
+
+  setRain(true);
+  triggerShake(15);
 
   startDialogue([
-    "Milca: Ang ganda ng lugar no?",
-    "Matt: Oo... mas maganda pag kasama ka."
+    "Milca: Matt... hintayin mo ako!",
+    "Matt: MILCA!!",
+    "System: Isang malakas na busina ang narinig..."
   ]);
+
+  setTimeout(() => {
+    startDialogue([
+      "....",
+      "Walang gumalaw.",
+      "Ang lahat ay natahimik."
+    ]);
+  }, 4000);
 }
 
-// TRIGGER JOLLIBEE
-function checkJollibee() {
-  const dx = player.x - jollibee.x;
-  const dy = player.y - jollibee.y;
+// CHECK TRUCK COLLISION
+function checkTruck() {
+  if (route !== "bad") return;
+
+  const dx = player.x - truckEvent.x;
+  const dy = player.y - truckEvent.y;
   const dist = Math.sqrt(dx * dx + dy * dy);
 
-  if (dist < 12 && Relationship.affection >= 5) {
-    startJollibeeDate();
+  if (dist < 15 && !truckEvent.triggered) {
+    truckEvent.triggered = true;
+    triggerSadEnding();
   }
 }
 
-// SIMPLE MAP SWITCH
-function updateScene() {
-  if (SceneManager.current === "school") {
-    schoolUpdate();
-  }
-
-  if (SceneManager.current === "jollibee") {
-    jollibeeUpdate();
-  }
-}
-
-// SCHOOL LOGIC
-function schoolUpdate() {
+// SCHOOL UPDATE
+function update() {
   let map = schoolMap;
 
   let nextX = player.x;
@@ -64,57 +68,64 @@ function schoolUpdate() {
 
   checkMilca();
   checkJollibee();
+  checkTruck();
 
   updateDialogue();
+  updateEffects();
 }
 
-// JOLLIBEE LOGIC
-function jollibeeUpdate() {
-  if (keys["e"]) {
-    Relationship.add(1);
-    keys["e"] = false;
+// DRAW MAP
+function drawMap() {
+  let map = schoolMap;
+
+  for (let y = 0; y < map.height; y++) {
+    for (let x = 0; x < map.width; x++) {
+      ctx.fillStyle =
+        (x === 0 || y === 0 || x === map.width - 1 || y === map.height - 1)
+          ? "#444"
+          : "#2b2b2b";
+
+      ctx.fillRect(
+        x * map.tileSize - camera.x,
+        y * map.tileSize - camera.y,
+        map.tileSize,
+        map.tileSize
+      );
+    }
   }
-
-  updateDialogue();
 }
 
-// DRAW
-function drawSchool() {
+// DRAW WORLD
+function draw() {
+  ctx.save();
+  clearScreen();
+
+  applyShake(ctx);
+
   drawMap();
 
+  // truck (hidden until bad route)
+  if (route === "bad") {
+    ctx.fillStyle = "red";
+    ctx.fillRect(truckEvent.x - camera.x, truckEvent.y - camera.y, 16, 10);
+  }
+
+  // Milca
   ctx.fillStyle = "pink";
   ctx.fillRect(120 - camera.x, 80 - camera.y, 8, 8);
 
+  // player
   ctx.fillStyle = "yellow";
   ctx.fillRect(player.x - camera.x, player.y - camera.y, 8, 8);
-}
-
-function drawJollibee() {
-  ctx.fillStyle = "#1f1f1f";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  ctx.fillStyle = "orange";
-  ctx.fillRect(100, 60, 60, 40);
-
-  ctx.fillStyle = "pink";
-  ctx.fillText("Milca is smiling...", 90, 120);
-
-  ctx.fillStyle = "yellow";
-  ctx.fillRect(player.x, player.y, 8, 8);
-}
-
-function draw() {
-  clearScreen();
-
-  if (SceneManager.current === "school") drawSchool();
-  if (SceneManager.current === "jollibee") drawJollibee();
 
   drawDialogue();
-  drawLighting(ctx);
+  drawRain(ctx);
+
+  ctx.restore();
 }
 
 function loop() {
-  updateScene();
+  update();
   draw();
   requestAnimationFrame(loop);
 }
