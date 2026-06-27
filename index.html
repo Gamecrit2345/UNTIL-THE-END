@@ -1,24 +1,19 @@
 <!DOCTYPE html>
-<html lang="tl">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>UNTIL THE END</title>
-    <link rel="stylesheet" href="css/styles.css">
+  <meta charset="UTF-8">
+  <title>UNTIL THE END</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="game-container">
-        <div id="background"></div>
-        <img id="character" class="pixel" src="" alt="Pixel Character">
-        <div id="dialogue-box"></div>
-        <div id="choices"></div>
 
-        <div id="title-screen">
-            <h1>UNTIL THE END</h1>
-            <p style="color:#ccc; font-size:1.5em;">Pixelated Love Story</p>
-            <button onclick="startGame()" style="margin-top:50px; padding:25px 60px; font-size:1.7em;">Simulan ang Kwento</button>
-        </div>
-    </div>
-    <script src="js/game.js"></script>
+<canvas id="gameCanvas"></canvas>
+
+<script src="engine.js"></script>
+<script src="controls.js"></script>
+<script src="player.js"></script>
+<script src="camera.js"></script>
+<script src="game.js"></script>
+
 </body>
 </html>
