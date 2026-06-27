@@ -1,25 +1,53 @@
 const player = new Player(50, 50);
 const camera = new Camera();
 
-Save.load();
+let scene = "school";
 
-let scene = Save.data.scene;
-
-// HOUSE MAP
-const houseMap = {
+// SCHOOL MAP
+const schoolMap = {
   tileSize: 16,
-  width: 16,
-  height: 10,
+  width: 20,
+  height: 12,
   tiles: []
 };
 
-for (let y = 0; y < houseMap.height; y++) {
-  for (let x = 0; x < houseMap.width; x++) {
-    if (x === 0 || y === 0 || x === houseMap.width - 1 || y === houseMap.height - 1) {
-      houseMap.tiles.push(1);
+for (let y = 0; y < schoolMap.height; y++) {
+  for (let x = 0; x < schoolMap.width; x++) {
+    if (x === 0 || y === 0 || x === schoolMap.width - 1 || y === schoolMap.height - 1) {
+      schoolMap.tiles.push(1);
     } else {
-      houseMap.tiles.push(0);
+      schoolMap.tiles.push(0);
     }
+  }
+};
+
+// Milca
+const milca = { x: 120, y: 80, size: 8, met: false };
+
+// interaction trigger
+function checkMilca() {
+  const dx = player.x - milca.x;
+  const dy = player.y - milca.y;
+  const dist = Math.sqrt(dx * dx + dy * dy);
+
+  if (dist < 12 && !milca.met) {
+    milca.met = true;
+
+    startDialogue(
+      [
+        "Milca: Uy, bago ka dito noh?",
+        "Matt: Oo... kakalipat ko lang.",
+        "Milca: Ako si Milca."
+      ],
+      {
+        onChoice: (c) => {
+          if (c === 1) Relationship.add(2);
+          if (c === 2) Relationship.add(-1);
+
+          Save.data.milcaMet = true;
+        }
+      }
+    );
   }
 }
 
@@ -32,16 +60,8 @@ function tileAt(map, x, y) {
   return map.tiles[ty * map.width + tx];
 }
 
-// PHONE SYSTEM
-let phoneOpen = false;
-let messages = [
-  { from: "Milca", text: "Uy Matt, gising ka pa?" },
-  { from: "Matt", text: "Oo, bakit?" },
-  { from: "Milca", text: "Wala lang... gusto ko lang mag-good night." }
-];
-
 function update() {
-  let map = houseMap;
+  let map = schoolMap;
 
   let nextX = player.x;
   let nextY = player.y;
@@ -49,30 +69,26 @@ function update() {
   if (keys["w"]) nextY -= player.speed;
   if (keys["s"]) nextY += player.speed;
   if (keys["a"]) nextX -= player.speed;
-  if (keys["d"]) nextX -= player.speed;
+  if (keys["d"]) nextX += player.speed;
 
   if (tileAt(map, nextX, player.y) === 0) player.x = nextX;
   if (tileAt(map, player.x, nextY) === 0) player.y = nextY;
 
   camera.follow(player);
 
-  // open phone
-  if (keys["p"]) {
-    phoneOpen = !phoneOpen;
-    keys["p"] = false;
-  }
+  checkMilca();
 
-  Save.save();
+  updateDialogue();
 }
 
 function drawMap() {
-  let map = houseMap;
+  let map = schoolMap;
 
   for (let y = 0; y < map.height; y++) {
     for (let x = 0; x < map.width; x++) {
-      let tile = map.tiles[y * map.width + x];
-
-      ctx.fillStyle = tile === 1 ? "#3a2f2f" : "#1f1f1f";
+      ctx.fillStyle = (x === 0 || y === 0 || x === map.width-1 || y === map.height-1)
+        ? "#444"
+        : "#2b2b2b";
 
       ctx.fillRect(
         x * map.tileSize - camera.x,
@@ -84,42 +100,20 @@ function drawMap() {
   }
 }
 
-function drawPhone() {
-  if (!phoneOpen) return;
-
-  ctx.fillStyle = "rgba(0,0,0,0.85)";
-  ctx.fillRect(40, 20, 240, 140);
-
-  ctx.fillStyle = "white";
-  ctx.font = "10px monospace";
-
-  ctx.fillText("MESSAGES", 50, 35);
-
-  let y = 55;
-  for (let m of messages) {
-    ctx.fillText(`${m.from}: ${m.text}`, 50, y);
-    y += 15;
-  }
-
-  ctx.fillText("Press P to close", 140, 150);
-}
-
-function drawPlayer() {
-  ctx.fillStyle = "yellow";
-  ctx.fillRect(
-    player.x - camera.x,
-    player.y - camera.y,
-    player.size,
-    player.size
-  );
-}
-
 function draw() {
   clearScreen();
 
   drawMap();
-  drawPlayer();
-  drawPhone();
+
+  // Milca
+  ctx.fillStyle = "pink";
+  ctx.fillRect(milca.x - camera.x, milca.y - camera.y, milca.size, milca.size);
+
+  // player
+  ctx.fillStyle = "yellow";
+  ctx.fillRect(player.x - camera.x, player.y - camera.y, player.size, player.size);
+
+  drawDialogue();
 }
 
 function loop() {
