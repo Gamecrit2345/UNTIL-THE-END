@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="tl">
 <head>
@@ -7,39 +8,41 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Opening Splash Screen -->
-    <div id="splash-screen">
-        <div class="logo">PIXELINDI</div>
-        <div class="dev">Likha ni: Denton Sagmayao</div>
-        <div class="year">© 2015</div>
-        <div class="press-start">Pindutin ang SPACE para magsimula</div>
+
+<!-- Opening Splash Screen -->
+<div id="splash">
+    <div class="splash-content">
+        <h1>PIXELINDI</h1>
+        <p>Likha ni: Denton Sagmayao</p>
+        <p>© 2015</p>
+        <p class="start-text">Pindutin ang SPACE para magsimula</p>
+    </div>
+</div>
+
+<!-- Main Game Screen -->
+<div id="game" class="hidden">
+    <div id="background"></div>
+
+    <!-- Characters -->
+    <div id="char-matt" class="char"></div>
+    <div id="char-milca" class="char"></div>
+
+    <!-- Dialog Box -->
+    <div id="dialog-box">
+        <div id="char-name"></div>
+        <div id="dialog-text"></div>
     </div>
 
-    <!-- Main Game Container -->
-    <div id="game-container" class="hidden">
-        <!-- Background / Map -->
-        <div id="background"></div>
+    <!-- Choices -->
+    <div id="choices" class="hidden"></div>
 
-        <!-- Characters -->
-        <div id="char-matt" class="character"></div>
-        <div id="char-milca" class="character"></div>
-
-        <!-- Dialog Box -->
-        <div id="dialog-box">
-            <div id="char-name"></div>
-            <div id="dialog-text"></div>
-        </div>
-
-        <!-- Choices -->
-        <div id="choices" class="hidden"></div>
-
-        <!-- Ending Screen -->
-        <div id="ending-screen" class="hidden">
-            <div id="ending-title"></div>
-            <div id="ending-text"></div>
-        </div>
+    <!-- Ending Screen -->
+    <div id="ending" class="hidden">
+        <h2 id="ending-title"></h2>
+        <p id="ending-text"></p>
     </div>
+</div>
 
-    <script src="script.js"></script>
+<script src="script.js"></script>
 </body>
 </html>
